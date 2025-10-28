@@ -1,0 +1,17 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend Proyecto ISW",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Claudio Candia Vargas",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.38.0",
+    "vite": "^7.1.12"
+  },
+  "dependencies": {
+    "react": "^19.2.0"
+  }
+}
