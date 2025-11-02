@@ -2,10 +2,11 @@ import "dotenv/config";
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import { connectDb } from "./config/configDb";
+import { connectDb } from "./config/configDb.js";
+import { routerApi } from "./routes/index.routes.js";
 
 const app = express();
-app(express.json());
+app.use(express.json());
 app.use(morgan("dev"));
 
 // Para permitir peticiones del frontend
