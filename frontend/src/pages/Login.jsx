@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
+import useLogin from '@hooks/useLogin';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -8,13 +9,15 @@ const Login = () => {
     
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { errorEmail, errorPassword, errorData, handleInputChange } = useLogin();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
+        
+        handleInputChange();
 
         try {
             const result = await login(email, password);
@@ -22,11 +25,11 @@ const Login = () => {
             if (result.success) {
                 navigate('/home'); 
             } else {
-                setError(result.message || "Credenciales incorrectas");
+                errorData(result.message || "Credenciales incorrectas");
             }
         } catch (err) {
             console.error('Login error:', err);
-            setError("Error inesperado al iniciar sesión");
+            errorData("Error inesperado al iniciar sesión");
         }
         setLoading(false);
     };
@@ -38,11 +41,15 @@ const Login = () => {
                     <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 mb-8">
                         Iniciar sesión
                     </h1>
-                    
-                    {/* Mensaje de error */}
-                    {error && (
+
+                    {errorEmail && (
                         <div className="p-3 bg-red-100 text-red-700 rounded-lg text-center font-semibold">
-                            {error}
+                            {errorEmail}
+                        </div>
+                    )}
+                    {errorPassword && (
+                        <div className="p-3 bg-red-100 text-red-700 rounded-lg text-center font-semibold">
+                            {errorPassword}
                         </div>
                     )}
 
@@ -54,7 +61,10 @@ const Login = () => {
                             type="email"
                             id="email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                handleInputChange();
+                            }}
                             placeholder="usuario@ejemplo.com"
                             required
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
@@ -69,7 +79,10 @@ const Login = () => {
                             type="password"
                             id="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                handleInputChange();
+                            }}
                             placeholder="**********"
                             required
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
@@ -83,11 +96,10 @@ const Login = () => {
                     >
                         {loading ? "Cargando..." : "Iniciar sesión"}
                     </button>
-
                 </form>
             </div>
         </div>
     );
-}
+};
 
 export default Login;
