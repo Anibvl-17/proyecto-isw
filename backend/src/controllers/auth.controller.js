@@ -1,18 +1,16 @@
 import { loginService, registerService } from "../services/auth.service.js"
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
+import { userAuthBodyValidation } from "../validations/auth.validation.js";
 
 export async function login(req, res) {
   try {
     const { body } = req;
 
-    // Validacion pendiente
-    /*
     const { error } = userAuthBodyValidation.validate(body);
 
     if (error) {
       return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
     }
-    */
     
     const data = await loginService(body);
     handleSuccess(res, 200, "Inicio de sesión exitoso", data);
@@ -25,14 +23,11 @@ export async function register(req, res) {
   try {
     const { body } = req;
 
-    // Validacion pendiente
-    /*
     const { error } = userAuthBodyValidation.validate(body);
 
     if (error) {
       return handleErrorClient(res, 400, "Parámetros invalidos", error.message);
     }
-    */
 
     const newUser = await registerService(body);
     delete newUser.password;
