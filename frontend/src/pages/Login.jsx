@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@context/AuthContext';
+import { useNavigate} from 'react-router-dom';
 import useLogin from '@hooks/useLogin';
+import login from '@services/auth.service';
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
     
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
