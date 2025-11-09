@@ -1,8 +1,23 @@
-import React from 'react';
+import { useState} from 'react';
 import { useAuth } from '@context/AuthContext';
+import { logout } from "../services/auth.service.js";
+import { useNavigate } from "react-router-dom";
+import cookies from "js-cookie";
 
 const Home = () => {
     const { user } = useAuth(); 
+    const navigate = useNavigate();
+    const [loading] = useState(false);
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            cookies.remove("jwt-auth");
+            navigate("/auth");
+        } catch (error) {
+            console.error('Login error:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
@@ -16,6 +31,15 @@ const Home = () => {
                 <p className="text-lg text-gray-600 mb-6">
                 Usuario: <strong className="text-purple-600">{user?.email}</strong>
                 </p>
+                <div className="flex flex-col gap-4">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-gray-300"
+                        isabled={loading}
+                    >
+                        Cerrar Sesión
+                    </button>
+                </div>
                 <p className="text-sm text-gray-500">
                 (falta implementar el resto de esta página).
                 </p>
