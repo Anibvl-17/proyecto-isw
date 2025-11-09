@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
 import useLogin from '@hooks/useLogin';
-import login from '@services/auth.service';
+import { login } from '@services/auth.service';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -32,6 +32,10 @@ const Login = () => {
         }
         setLoading(false);
     };
+
+    const handleRegister = () => {
+      navigate("/register");
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
@@ -94,6 +98,14 @@ const Login = () => {
                         className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50"
                     >
                         {loading ? "Cargando..." : "Iniciar sesión"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="w-full bg-transparent border-2 border-transparent text-purple-600 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-110 hover:underline focus:scale-100"
+                      onClick={handleRegister}
+                    >
+                      ¿No tienes cuenta? Registrate
                     </button>
                 </form>
             </div>
