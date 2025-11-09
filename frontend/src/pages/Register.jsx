@@ -38,10 +38,10 @@ const Register = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-linear-to-br from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md transform transition-all hover:scale-105">
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                    <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-600 mb-8">
+                    <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-linear-to-r from-purple-600 to-blue-600 mb-8">
                         Registrarse
                     </h1>
 
@@ -95,7 +95,7 @@ const Register = () => {
                     <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50"
+                        className="w-full bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50"
                     >
                         {loading ? "Cargando..." : "Registrarse"}
                     </button>
