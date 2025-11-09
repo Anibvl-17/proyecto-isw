@@ -1,9 +1,8 @@
 import axios from './root.service.js';
 import cookies from 'js-cookie';
 
-export async function login(dataUser) {
+export default async function login(email, password) {
     try {
-        const { email, password } = dataUser;
         
         const response = await axios.post('/auth/login', {
             email,
