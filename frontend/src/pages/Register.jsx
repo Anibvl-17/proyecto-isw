@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
-import useLogin from '@hooks/useLogin';
-import { login } from '@services/auth.service';
+import useRegister from '@hooks/useRegister';
+import { register }  from '@services/auth.service';
 
-const Login = () => {
+const Register = () => {
     const navigate = useNavigate();
     
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { errorEmail, errorPassword, errorData, handleInputChange } = useLogin();
+    const { errorEmail, errorPassword, errorData, handleInputChange } = useRegister();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,22 +19,22 @@ const Login = () => {
         handleInputChange();
 
         try {
-            const result = await login(email, password);
+            const result = await register(email, password);
 
             if (result.success) {
-                navigate('/home'); 
+                navigate('/auth'); 
             } else {
                 errorData(result.message || "Credenciales incorrectas");
             }
         } catch (err) {
-            console.error('Login error:', err);
-            errorData("Error inesperado al iniciar sesión");
+            console.error('Register error:', err);
+            errorData("Error inesperado al registrarse");
         }
         setLoading(false);
     };
 
-    const handleRegister = () => {
-      navigate("/register");
+    const handleLogin = () => {
+      navigate("/auth");
     }
 
     return (
@@ -42,7 +42,7 @@ const Login = () => {
             <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 w-full max-w-md transform transition-all hover:scale-105">
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-linear-to-r from-purple-600 to-blue-600 mb-8">
-                        Iniciar sesión
+                        Registrarse
                     </h1>
 
                     {errorEmail && (
@@ -97,15 +97,15 @@ const Login = () => {
                         disabled={loading}
                         className="w-full bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300 disabled:opacity-50"
                     >
-                        {loading ? "Cargando..." : "Iniciar sesión"}
+                        {loading ? "Cargando..." : "Registrarse"}
                     </button>
 
                     <button
                       type="button"
                       className="w-full bg-transparent border-2 border-transparent text-purple-600 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-110 hover:underline focus:scale-100"
-                      onClick={handleRegister}
+                      onClick={handleLogin}
                     >
-                      ¿No tienes cuenta? Registrate
+                      ¿Ya tienes cuenta? Inicia sesión
                     </button>
                 </form>
             </div>
@@ -113,4 +113,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;
