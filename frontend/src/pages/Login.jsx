@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate} from 'react-router-dom';
 import useLogin from '@hooks/useLogin';
 import { login } from '@services/auth.service';
+import { useAuth } from '@context/AuthContext';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -9,6 +10,8 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { setUser } = useAuth();
 
     const { errorEmail, errorPassword, errorData, handleInputChange } = useLogin();
 
@@ -22,6 +25,7 @@ const Login = () => {
             const result = await login(email, password);
 
             if (result.success) {
+                setUser(result.user);
                 navigate('/home'); 
             } else {
                 errorData(result.message || "Credenciales incorrectas");
