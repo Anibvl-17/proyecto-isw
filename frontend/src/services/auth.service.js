@@ -27,10 +27,13 @@ export async function register(email, password) {
       email,
       password
     });
-    return response.data;
+    return { success: true, message: response.data };
   } catch (error) {
     console.error("Error en el servicio de register:", error.response?.data);
-    return error.response?.data || { message: "Error al conectar con el servidor" }
+    return { 
+      success: false, 
+      message: error.response?.data?.message || "Error al conectar con el servidor" 
+   }
   }
 }
 
