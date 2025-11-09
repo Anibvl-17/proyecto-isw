@@ -1,7 +1,7 @@
 import axios from './root.service.js';
 import cookies from 'js-cookie';
 
-export default async function login(email, password) {
+export async function login(email, password) {
     try {
         
         const response = await axios.post('/auth/login', {
@@ -19,4 +19,26 @@ export default async function login(email, password) {
         console.error("Error en el servicio de login:", error.response?.data);
         return { success: false, message: error.response?.data?.message || 'Error al conectar con el servidor' };
     }
+}
+
+export async function register(email, password) {
+  try {
+    const response = await axios.post("auth/register", {
+      email,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error en el servicio de register:", error.response?.data);
+    return error.response?.data || { message: "Error al conectar con el servidor" }
+  }
+}
+
+export async function logout() {
+  try {
+    sessionStorage.removeItem("usuario");
+    cookies.remove("jwt-auth");
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+  }
 }
