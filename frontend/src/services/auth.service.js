@@ -23,7 +23,7 @@ export async function login(email, password) {
 
 export async function register(email, password) {
   try {
-    const response = await axios.post("auth/register", {
+    const response = await axios.post("/auth/register", {
       email,
       password
     });
