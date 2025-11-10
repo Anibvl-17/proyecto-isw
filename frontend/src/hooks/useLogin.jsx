@@ -6,7 +6,7 @@ const useLogin = () => {
 
     const errorData = (dataMessage) => {
         if (dataMessage) {
-            if (dataMessage.includes('email') || dataMessage.includes('Email')) {
+            if (dataMessage.includes('email') || dataMessage.includes('Email') || dataMessage.includes("credenciales") || dataMessage.includes("Credenciales")) {
                 setErrorEmail(dataMessage);
             } else if (dataMessage.includes('password') || dataMessage.includes('contraseña')) {
                 setErrorPassword(dataMessage);
