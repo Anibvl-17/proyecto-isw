@@ -2,31 +2,57 @@
 
 import Joi from "joi";
 
-export const userAuthBodyValidation = Joi.object({
+export const userRegisterBodyValidation = Joi.object({
     email: Joi.string()
-        .min(6)
-        .max(254)
-        .pattern(/^[\w._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/)
+        .email()
         .required()
         .messages({
-            "string.min": "El email debe tener al menos 6 caracteres.",
-            "string.max": "El email no debe tener mas de 254 caracteres.",
-            "string.pattern.base": "El formato del email no es valido.",
-            "string.empty": "El email es obligatorio."
+            "string.email": "Debe ser un email válido",
+            "string.empty": "El email no puede estar vacío",
+            "any.required": "El email es obligatorio"
+        }),
+    rut: Joi.string()
+        .pattern(/^\d{7,8}-[\dkK]$/)
+        .required()
+        .messages({
+            "string.pattern.base": "El RUT debe tener formato 12345678-9 o 12345678-k",
+            "string.empty": "El RUT no puede estar vacío",
+            "any.required": "El RUT es obligatorio"
         }),
     password: Joi.string()
-        .min(8)
-        .max(30)
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+.,;:<>?{}[\]~-]).+$/)
+        .min(6)
         .required()
         .messages({
-            "string.min": "La contraseña debe tener al menos 8 caracteres.",
-            "string.max": "La contraseña no debe tener mas de 30 caracteres.",
-            "string.pattern.base": "La contraseña debe incluir al menos una letra mayúscula, una minúscula, un número y un carácter especial.",
-            "string.empty": "La contraseña es obligatoria.",
+            "string.min": "La contraseña debe tener al menos 6 caracteres",
+            "string.empty": "La contraseña no puede estar vacía",
+            "any.required": "La contraseña es obligatoria"
         }),
-})
-    .unknown(false)
-    .messages({
-        "object.unknown": "No se permiten propiedades adicionales.",
-    });
+    role: Joi.string()
+        .valid("administrador", "jefe_carrera", "docente", "alumno")
+        .optional()
+        .default("alumno")
+        .messages({
+            "any.only": "El rol debe ser: administrador, jefe_carrera, docente o alumno"
+        })
+}).options({
+    stripUnknown: true
+});
+
+export const userLoginBodyValidation = Joi.object({
+    email: Joi.string()
+        .email()
+        .required()
+        .messages({
+            "string.email": "Debe ser un email válido",
+            "string.empty": "El email no puede estar vacío",
+            "any.required": "El email es obligatorio"
+        }),
+    password: Joi.string()
+        .required()
+        .messages({
+            "string.empty": "La contraseña no puede estar vacía",
+            "any.required": "La contraseña es obligatoria"
+        })
+}).options({
+    stripUnknown: true
+});
