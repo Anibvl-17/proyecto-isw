@@ -7,36 +7,39 @@ export const ElectiveEntity = new EntitySchema({
     tableName: "electives",
     columns: {
         id: {
-            type: Number,
+            type: "int",
             primary: true,
             generated: true,
         },
         teacherRut: {
-            type: String,
+            type: "varchar",
+            length: 12,
             nullable: false,
         },
         name: {
-            type: String,
+            type: "varchar",
+            length: 255,
             nullable: false,
         },
         description: {
-            type: String,
+            type: "text",
             nullable: false,
         },
         objectives: {
-            type: String,
+            type: "text",
             nullable: false,
         },
         prerrequisites: {
-            type: String,
+            type: "text",
             nullable: true,
         },
-        schedule : {
-            type: String,
+        schedule: {
+            type: "varchar",
+            length: 255,
             nullable: false,
         },
-        quotas : {
-            type: Number,
+        quotas: {
+            type: "int",
             nullable: false,
         },
         status: {
@@ -47,12 +50,13 @@ export const ElectiveEntity = new EntitySchema({
         },
         createdAt: {
             type: "timestamp",
+            createDate: true,
             default: () => "CURRENT_TIMESTAMP",
         },
         updatedAt: {
             type: "timestamp",
             default: () => "CURRENT_TIMESTAMP",
-            onUpdate: "CURRENT_TIMESTAMP",
+            updateDate: true,
         },
     },
 });
