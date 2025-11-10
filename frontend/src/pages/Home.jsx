@@ -1,22 +1,14 @@
 import { useState} from 'react';
 import { useAuth } from '@context/AuthContext';
-import { logout } from "../services/auth.service.js";
 import { useNavigate } from "react-router-dom";
-import cookies from "js-cookie";
 
 const Home = () => {
     const { user } = useAuth(); 
     const navigate = useNavigate();
     const [loading] = useState(false);
 
-    const handleLogout = async () => {
-        try {
-            await logout();
-            cookies.remove("jwt-auth");
-            navigate("/auth");
-        } catch (error) {
-            console.error('Login error:', error);
-        }
+    const handleLogout = () => {
+        navigate("/logout");
     };
 
     return (
@@ -35,7 +27,7 @@ const Home = () => {
                     <button
                         onClick={handleLogout}
                         className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-gray-300"
-                        isabled={loading}
+                        disabled={loading}
                     >
                         Cerrar Sesión
                     </button>
