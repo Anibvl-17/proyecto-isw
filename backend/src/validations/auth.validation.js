@@ -3,6 +3,19 @@
 import Joi from "joi";
 
 export const userRegisterBodyValidation = Joi.object({
+    username: Joi.string()
+        .required()
+        .min(2)
+        .max(75)
+        .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]{2,75}/)
+        .messages({
+            "string.base": "El nombre de usuario debe ser de tipo String",
+            "string.empty": "El nombre de usuario no puede estar vacío",
+            "string.min": "El nombre de usuario debe tener al menos 2 caracteres",
+            "string.max": "El nombre de usuario no puede exceder los 75 caracteres",
+            "string.pattern": "El nombre de usuario solo debe tener letras",
+            "any.required": "El nombre de usuario es obligatorio"
+        }),
     email: Joi.string()
         .email()
         .required()

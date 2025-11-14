@@ -35,6 +35,7 @@ export async function loginService(data) {
         token,
         user: {
             id: user.id,
+            username: user.username,
             email: user.email,
             rut: user.rut,
             role: user.role
@@ -47,6 +48,7 @@ export async function registerService(data) {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     
     const newUser = userRepository.create({
+        username: data.username,
         email: data.email,
         rut: data.rut,
         password: hashedPassword,
