@@ -47,6 +47,7 @@ export async function registerService(data) {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     
     const newUser = userRepository.create({
+        username: data.username,
         email: data.email,
         rut: data.rut,
         password: hashedPassword,
