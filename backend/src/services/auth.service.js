@@ -35,6 +35,7 @@ export async function loginService(data) {
         token,
         user: {
             id: user.id,
+            username: user.username,
             email: user.email,
             rut: user.rut,
             role: user.role
