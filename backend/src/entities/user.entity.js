@@ -9,6 +9,10 @@ export const User = new EntitySchema({
             type: "int",
             generated: "increment",
         },
+        username: {
+            type: "varchar",
+            nullable: false
+        },
         email: {
             type: "varchar",
             length: 255,
