@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import { connectDb } from "./config/configDb.js";
 import { routerApi } from "./routes/index.routes.js";
+import { createInitialUser } from "./config/initDb.js";
 
 const app = express();
 app.use(express.json());
@@ -26,6 +27,8 @@ connectDb()
   .then(() => {
     // Carga las rutas de la aplicación
     routerApi(app);
+
+    createInitialUser();
 
     // Levanta el servidor
     const PORT = process.env.PORT || 3000;
