@@ -24,7 +24,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <button
             onClick={handleLogout}
-            className="flex flex-row items-center border-2 px-3 py-1 gap-2 rounded-full font-medium border-gray-300 transition-all hover:bg-gray-50 hover:shadow-sm"
+            className="flex flex-row items-center border-2 px-3 py-1 gap-2 rounded-full font-medium border-gray-300 transition-all hover:bg-gray-50 hover:shadow-sm active:bg-gray-200 outline-1 outline-transparent focus:outline-gray-500"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
