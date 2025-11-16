@@ -8,6 +8,7 @@ import Home from '@pages/Home'
 import ProtectedRoute from '@components/ProtectedRoute'
 import '@styles/styles.css';
 import Logout from './pages/Logout'
+import Users from '@pages/Users'
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/users",
+        element: (
+          // Verificar rol de admin!
+          <ProtectedRoute>
+            <Users />
           </ProtectedRoute>
         )
       }
