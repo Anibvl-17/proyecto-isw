@@ -1,6 +1,6 @@
 "use strict";
 
-import User from "../entities/user.entity.js";
+import { User } from "../entities/user.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 
 export async function isAdmin(req, res, next) {

@@ -23,6 +23,9 @@ export async function createInscription(req, res){
 export async function getInscription(req, res){
     try {
         const inscription = await getInscriptionService();
+
+        if(inscription.length < 1) return handleSuccess(res, 404, "No se encontro ninguna inscripcion");
+
         handleSuccess(res, 200, "Inscripciones obtenidas exitosamente", inscription);
     } catch (error) {
         handleErrorServer(res, 500, "Error al obtener las solicitudes", error.message);
