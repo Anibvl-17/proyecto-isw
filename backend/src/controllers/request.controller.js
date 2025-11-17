@@ -3,7 +3,7 @@ import {
   handleErrorServer,
   handleSuccess,
 } from "../handlers/responseHandlers.js";
-import { createRequestService, getRequestsService, getRequestByIdService, reviewRequestService } from "../services/request.service.js";
+import { createRequestService, getRequestsService, getRequestByIdService, reviewRequestService, hasRequestOfElectiveService } from "../services/request.service.js";
 import { createRequestBodyValidation, reviewRequestValidation } from "../validations/request.validation.js";
 import jwt from "jsonwebtoken";
 
@@ -14,8 +14,10 @@ export async function createRequest(req, res) {
 
     if (error) return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
 
-    // Verificar si ya hizo una solicitud al electivo anteriormente
-    // para evitar solicitudes duplicadas
+    // Verifica si ya existe una solicitud al electivo anteriormente para evitar 
+    // solicitudes duplicadas
+    const hasRequest = await hasRequestOfElectiveService(body.studentId, body.electiveId);
+    if (hasRequest) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
 
     const newRequest = await createRequestService(body);
     handleSuccess(res, 201, "Solicitud creada exitosamente", newRequest);
