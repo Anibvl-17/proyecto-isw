@@ -46,13 +46,19 @@ export async function getRequests(req, res) {
   }
 }
 
-// Igual que en el caso anterior, solo solicitudes propias para estudiante
-// Jefe de carrera puede ver todas las solictudes
 export async function getRequestById(req, res) {
   try {
     const { id } = req.params;
-    
     const request = await getRequestByIdService(id);
+
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.decode(token, process.env.JWT_SECRET);
+
+    if (payload.role === "alumno" && request.studentId !== payload.id) {
+      return handleErrorClient(res, 401, "La solicitud no corresponde al alumno");
+    }
+
     handleSuccess(res, 200, "Solicitud encontrada", request);
   } catch (error) {
     if (error.message === "Solicitud no encontrada") {
@@ -63,7 +69,6 @@ export async function getRequestById(req, res) {
   }
 }
 
-// Solo el jefe de carrera puede revisar solicitudes
 export async function reviewRequest(req, res) {
   try {
     const { body } = req;
