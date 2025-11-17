@@ -28,6 +28,9 @@ export async function createRequest(req, res) {
 export async function getRequests(req, res) {
   try {
     const requests = await getRequestsService();
+
+    if (requests.length === 0) handleSuccess(res, 404, "No hay solicitudes disponibles");
+
     handleSuccess(res, 200, "Solicitudes obtenidas exitosamente", requests);
   } catch (error) {
     handleErrorServer(res, 500, "Error al obtener las solicitudes", error.message);
