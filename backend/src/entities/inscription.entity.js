@@ -7,16 +7,16 @@ export const Inscription = new EntitySchema({
     tableName: "inscripciones",
     columns: {
         id: {
-            type: Number,
+            type: "int",
             primary: true,
             generated: true,
         },
         userId: {
-            type: Number,
+            type: "int",
             nullable: false,
         },
         electiveId: {
-            type: Number,
+            type: "int",
             nullable: false,
         },
         estado: {
