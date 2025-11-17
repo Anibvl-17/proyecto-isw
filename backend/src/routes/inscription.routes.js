@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticateJwt } from "../middleware/authentication.middleware.js";
+import { isAdmin } from "../middleware/authorization.middleware.js";
 import {
     createInscription,
     getInscription,
@@ -11,13 +12,13 @@ import {
 const router = Router();
 router.use(authenticateJwt);
 
-router.get("/", getInscription);
-router.get("/:id", getInscriptionId);
+router.get("/", getInscription); // Docente y Alumno Segun sus inscripciones
+router.get("/:id", getInscriptionId); // Alumno
 
-router.post("/", createInscription);
+router.post("/", createInscription); //Alumno y jefe de carrera
 
-router.delete("/:id", deleteInscriptionId);
+router.delete("/:id", deleteInscriptionId); //Alumno
 
-router.patch("/status/:id", updateStatus);
+router.patch("/status/:id", isAdmin, updateStatus); //Jefe de carrera
 
 export default router;

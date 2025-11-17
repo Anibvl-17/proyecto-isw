@@ -29,7 +29,7 @@ export async function deleteInscriptionIdService(id){
 
     if(!inscription) return false;
 
-    await inscriptionRepository.delete(inscription);
+    await inscriptionRepository.remove(inscription);
     return true;
 }
 
@@ -39,7 +39,6 @@ export async function updateStatusService(id, data){
 
     if (!inscription) throw new Error("Inscripción no encontrada");
 
-    //inscriptionRepository.merge(inscription, data);
     inscription.estado = data.estado;
 
     if (data.estado === "rechazado") inscription.motivo_rechazo = data.motivo_rechazo;
