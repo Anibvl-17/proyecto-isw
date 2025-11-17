@@ -23,6 +23,21 @@ export async function getRequestByIdService(id) {
   return request;
 }
 
+// Verifica si existe una solicitud en estado pendiente o aprobada según el id de electivo
+export async function hasRequestOfElectiveService(studentId, electiveId) {
+  const requestRepository = AppDataSource.getRepository(Request);
+  const request = await requestRepository.find({
+    where: [
+      {studentId, electiveId, status: "pendiente"},
+      {studentId, electiveId, status: "aprobado"}
+      ]
+  });
+
+  if (request.length === 0) return false;
+  
+  return true;
+}
+
 export async function reviewRequestService(id, data) {
   const requestRepository = AppDataSource.getRepository(Request);
   const request = await getRequestByIdService(id);
