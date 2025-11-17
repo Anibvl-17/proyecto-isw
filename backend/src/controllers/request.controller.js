@@ -5,6 +5,7 @@ import {
 } from "../handlers/responseHandlers.js";
 import { createRequestService, getRequestsService, getRequestByIdService, reviewRequestService } from "../services/request.service.js";
 import { createRequestBodyValidation, reviewRequestValidation } from "../validations/request.validation.js";
+import jwt from "jsonwebtoken";
 
 export async function createRequest(req, res) {
   try {
@@ -23,14 +24,20 @@ export async function createRequest(req, res) {
   }
 }
 
-// En caso de ser estudiante, obtener solo las solicitudes propias
-// En caso de ser jefe de carrera, ver todas las solicitudes
 export async function getRequests(req, res) {
   try {
-    const requests = await getRequestsService();
+    let requests = await getRequestsService();
 
-    if (requests.length === 0) handleSuccess(res, 404, "No hay solicitudes disponibles");
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.decode(token, process.env.JWT_SECRET);
 
+    // Los alumnos solo pueden ver sus propias solicitudes
+    if (payload.role === "alumno") {      
+      requests = requests.filter((request) => request.studentId === payload.id);
+    }
+    
+    if (requests.length === 0) return handleSuccess(res, 404, "No hay solicitudes disponibles");
     handleSuccess(res, 200, "Solicitudes obtenidas exitosamente", requests);
   } catch (error) {
     handleErrorServer(res, 500, "Error al obtener las solicitudes", error.message);
