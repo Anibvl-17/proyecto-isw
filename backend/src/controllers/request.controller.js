@@ -14,9 +14,14 @@ export async function createRequest(req, res) {
 
     if (error) return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
 
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.decode(token, process.env.JWT_SECRET);
+    body.studentId = payload.id;
+
     // Verifica si ya existe una solicitud al electivo anteriormente para evitar 
     // solicitudes duplicadas
-    const hasRequest = await hasRequestOfElectiveService(body.studentId, body.electiveId);
+    const hasRequest = await hasRequestOfElectiveService(payload.id, body.electiveId);
     if (hasRequest) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
 
     const newRequest = await createRequestService(body);
