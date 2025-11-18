@@ -1,12 +1,6 @@
 import Joi from "joi";
 
 export const createRequestBodyValidation = Joi.object({
-  studentId: Joi.number().required().integer().min(0).messages({
-    "any.required": "El ID del estudiante es obligatorio.",
-    "number.base": "El ID del estudiante debe ser un número.",
-    "number.integer": "El ID debe ser un número entero.",
-    "number.min": "El ID debe ser un entero positivo.",
-  }),
   electiveId: Joi.number().required().integer().min(0).messages({
     "any.required": "El ID del electivo es obligatorio.",
     "number.base": "El ID del electivo debe ser un número.",
