@@ -6,7 +6,8 @@ import {
 import { createInscriptionBodyValidation, updateStatusValidation } from "../validations/inscription.validation.js";
 import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService } from "../services/inscription.service.js";
 
-export async function createInscription(req, res){
+export async function createInscription(req, res){//Ver bien como implementar que e jefe de carrera peda inscribir a un alumno a electivo ya que se puede dar el alumno caso de que no pueda 
+                                                    //Inscribirse porque estan los cupos llenos entonces el jede de carrera podria hacerlo
     try {
         const data = req.body;
         const { error } = createInscriptionBodyValidation.validate(data);
@@ -20,7 +21,8 @@ export async function createInscription(req, res){
     }
 }
 
-export async function getInscription(req, res){
+export async function getInscription(req, res){ //modificarlo para que el docente pueda ver todas las inscripcions de los estudiantes su electivo correspondiente
+                                                //modificar para que el alumno pueda ver todas las inscripciones a las que ya se a inscrito
     try {
         const inscription = await getInscriptionService();
 
@@ -32,7 +34,7 @@ export async function getInscription(req, res){
     }
 }
 
-export async function getInscriptionId(req, res){
+export async function getInscriptionId(req, res){ //modificar para que el alumno pueda ver una de las inscripciones a la que ya esta inscrito
     try {
         const { id } = req.params;
         const inscription = await getInscriptionIdService(id);
