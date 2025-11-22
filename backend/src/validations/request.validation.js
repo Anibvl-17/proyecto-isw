@@ -29,27 +29,19 @@ export const reviewRequestValidation = Joi.object({
       "any.only": 'Solo se permiten estados "aprobado", "rechazado" y "pendiente"',
       "string.lowercase": "El estado debe estar en minúsculas",
     }),
-  reviewerId: Joi.number().required().integer().min(0).messages({
-    "any.required": "El ID del revisor es obligatorio.",
-    "number.base": "El ID del revisor debe ser un número.",
-    "number.integer": "El ID del revisor debe ser un número entero.",
-    "number.min": "El ID del revisor debe ser un entero positivo.",
-  }),
-  reviewComment: Joi.string()
-    .trim()
-    .min(5)
-    .max(300)
-    .when("status", {
+  reviewComment: Joi.when("status", {
       is: "rechazado",
-      then: Joi.required().messages({
-        "any.required": "El comentario del revisor es obligatorio al rechazar la solicitud.",
-      }),
+      then: Joi.string().required()
+        .trim()
+        .min(5)
+        .max(300)
+        .messages({
+          "any.required": "El comentario del revisor es obligatorio al rechazar la solicitud.",
+          "string.base": "El comentario del revisor debe ser de tipo String.",
+          "string.min": "El comentario del revisor debe contener al menos 5 caracteres.",
+          "string.max": "El comentario del revisor puede contener hasta 300 caracteres.",
+        }),
     })
-    .messages({
-      "string.base": "El comentario del revisor debe ser de tipo String.",
-      "string.min": "El comentario del revisor debe contener al menos 5 caracteres.",
-      "string.max": "El comentario del revisor puede contener hasta 300 caracteres.",
-    }),
 })
   .unknown(false)
   .options({ abortEarly: false })

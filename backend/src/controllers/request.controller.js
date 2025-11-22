@@ -44,7 +44,7 @@ export async function getRequests(req, res) {
       requests = requests.filter((request) => request.studentId === payload.id);
     }
     
-    if (requests.length === 0) return handleSuccess(res, 404, "No hay solicitudes disponibles");
+    if (requests.length === 0) return handleSuccess(res, 204, "No hay solicitudes disponibles");
     handleSuccess(res, 200, "Solicitudes obtenidas exitosamente", requests);
   } catch (error) {
     handleErrorServer(res, 500, "Error al obtener las solicitudes", error.message);
@@ -86,6 +86,11 @@ export async function reviewRequest(req, res) {
 
     const { error } = reviewRequestValidation.validate(body);
     if (error) return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
+
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.decode(token, process.env.JWT_SECRET);
+    body.reviewerId = payload.id;
 
     const updatedRequest = await reviewRequestService(id, body);
     handleSuccess(res, 200, "Solicitud revisada exitosamente", updatedRequest);

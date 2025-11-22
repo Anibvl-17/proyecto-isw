@@ -3,6 +3,7 @@ import { useNavigate} from 'react-router-dom';
 import useLogin from '@hooks/useLogin';
 import { login } from '@services/auth.service';
 import { useAuth } from '@context/AuthContext';
+import { logout } from '@services/auth.service';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -22,6 +23,8 @@ const Login = () => {
         handleInputChange();
 
         try {
+            // Elimina los datos (si es que existen) de otra sesión iniciada
+            await logout();
             const result = await login(email, password);
 
             if (result.success) {
