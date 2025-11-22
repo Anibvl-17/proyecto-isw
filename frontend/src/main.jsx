@@ -8,6 +8,7 @@ import ProtectedRoute from '@components/ProtectedRoute'
 import '@styles/styles.css';
 import Logout from './pages/Logout'
 import Users from '@pages/Users'
+import Requests from './pages/Requests'
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,15 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/requests",
+        element: (
+          // Verificar roles alumno y jefe carrera
+          <ProtectedRoute>
+            <Requests />
           </ProtectedRoute>
         )
       },
