@@ -4,6 +4,7 @@ import Root from '@pages/Root'
 import Error404 from '@pages/Error404'
 import Login from '@pages/Login'
 import Home from '@pages/Home'
+import Inscription from './pages/Inscription'
 import ProtectedRoute from '@components/ProtectedRoute'
 import '@styles/styles.css';
 import Logout from './pages/Logout'
@@ -51,6 +52,14 @@ const router = createBrowserRouter([
           // Verificar rol de admin!
           <ProtectedRoute>
             <Users />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/inscription",
+        element: (
+          <ProtectedRoute>
+            <Inscription />
           </ProtectedRoute>
         )
       }
