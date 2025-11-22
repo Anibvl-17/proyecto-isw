@@ -25,3 +25,72 @@ export async function isAdmin(req, res, next) {
 
     }
 }
+
+export async function isTeacher(req, res, next) {
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const userFound = await userRepository.findOneBy({
+            email: req.user?.email,
+        });
+        if (!userFound)
+            return res.status(404).json({ message: "Usuario no encontrado" });
+
+        const userRole = userFound.role;
+
+        if (userRole !== "docente")
+            return res.status(403).json({
+                message: "Acceso denegado: se requieren privilegios de docente"
+            });
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ message: "Error interno del servidor", error });
+
+    }
+}
+
+export async function isCareerHead(req, res, next) {
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const userFound = await userRepository.findOneBy({
+            email: req.user?.email,
+        });
+        if (!userFound)
+            return res.status(404).json({ message: "Usuario no encontrado" });
+
+        const userRole = userFound.role;
+
+        if (userRole !== "jefe_carrera")
+            return res.status(403).json({
+                message: "Acceso denegado: se requieren privilegios de jefe de carrera"
+            });
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ message: "Error interno del servidor", error });
+
+    }
+}
+
+export async function isStudent(req, res, next) {
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const userFound = await userRepository.findOneBy({
+            email: req.user?.email,
+        });
+        if (!userFound)
+            return res.status(404).json({ message: "Usuario no encontrado" });
+
+        const userRole = userFound.role;
+
+        if (userRole !== "alumno")
+            return res.status(403).json({
+                message: "Acceso denegado: se requieren privilegios de alumno"
+            });
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ message: "Error interno del servidor", error });
+
+    }
+}
