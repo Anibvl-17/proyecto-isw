@@ -4,7 +4,9 @@ import {
     handleSuccess,
 } from "../handlers/responseHandlers.js";
 import { createInscriptionBodyValidation, updateStatusValidation } from "../validations/inscription.validation.js";
-import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService } from "../services/inscription.service.js";
+import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService, hasInscriptionToElectiveService } from "../services/inscription.service.js";
+import { getElectivesService } from "../services/elective.service.js";
+import jwt from "jsonwebtoken";
 
 export async function createInscription(req, res){//Ver bien como implementar que e jefe de carrera peda inscribir a un alumno a electivo ya que se puede dar el alumno caso de que no pueda 
                                                     //Inscribirse porque estan los cupos llenos entonces el jede de carrera podria hacerlo
@@ -14,6 +16,14 @@ export async function createInscription(req, res){//Ver bien como implementar qu
 
         if(error) return handleErrorClient(res, 400, "Parametros invalidos", error.message);
 
+        const authHeader = req.headers["authorization"];
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.decode(token, process.env.JWT_SECRET);
+        data.userId = payload.id;
+
+        const hasInscription = await hasInscriptionToElectiveService(payload.id, data.electiveId);
+        if(hasInscription) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
+
         const newInscription = await createInscriptionService(data);
         handleSuccess(res, 201, "Inscripcion creada exitosamente", newInscription);
     } catch (error) {
@@ -21,23 +31,44 @@ export async function createInscription(req, res){//Ver bien como implementar qu
     }
 }
 
-export async function getInscription(req, res){ //modificarlo para que el docente pueda ver todas las inscripcions de los estudiantes su electivo correspondiente
-                                                //modificar para que el alumno pueda ver todas las inscripciones a las que ya se a inscrito
+export async function getInscription(req, res){
     try {
-        const inscription = await getInscriptionService();
+        let inscriptions = await getInscriptionService();
+        
+        const authHeader = req.headers["authorization"];
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.decode(token, process.env.JWT_SECRET);
 
-        if(inscription.length < 1) return handleSuccess(res, 404, "No se encontro ninguna inscripcion");
+        if (payload.role === "alumno"){
+            inscriptions = inscriptions.filter((inscription) => inscription.userId === payload.id);
+        } else if (payload.role === "docente"){
+            const electives = await getElectivesService();
 
-        handleSuccess(res, 200, "Inscripciones obtenidas exitosamente", inscription);
+            const myElectives = electives.filter(elective => elective.teacherRut === payload.rut).map(elective => elective.id);
+
+            inscriptions = inscriptions.filter((inscription) => myElectives.includes(inscription.electiveId));
+        }
+
+        if(inscriptions.length < 1) return handleSuccess(res, 404, "No se encontro ninguna inscripcion");
+
+        handleSuccess(res, 200, "Inscripciones obtenidas exitosamente", inscriptions);
     } catch (error) {
         handleErrorServer(res, 500, "Error al obtener las solicitudes", error.message);
     }
 }
 
-export async function getInscriptionId(req, res){ //modificar para que el alumno pueda ver una de las inscripciones a la que ya esta inscrito
+export async function getInscriptionId(req, res){
     try {
         const { id } = req.params;
         const inscription = await getInscriptionIdService(id);
+
+        const authHeader = req.headers["authorization"];
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.decode(token, process.env.JWT_SECRET);
+
+        if(payload.role === "alumno" && inscription.userId !== payload.id){
+            return handleErrorClient(res, 403, "La solicitud no corresponde al alumno");
+        }
 
         handleSuccess(res, 200, "Inscripcion encontrada", inscription);
     } catch (error) {
