@@ -29,12 +29,6 @@ export const reviewRequestValidation = Joi.object({
       "any.only": 'Solo se permiten estados "aprobado", "rechazado" y "pendiente"',
       "string.lowercase": "El estado debe estar en minúsculas",
     }),
-  reviewerId: Joi.number().required().integer().min(0).messages({
-    "any.required": "El ID del revisor es obligatorio.",
-    "number.base": "El ID del revisor debe ser un número.",
-    "number.integer": "El ID del revisor debe ser un número entero.",
-    "number.min": "El ID del revisor debe ser un entero positivo.",
-  }),
   reviewComment: Joi.string()
     .trim()
     .min(5)

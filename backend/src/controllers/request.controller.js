@@ -87,6 +87,11 @@ export async function reviewRequest(req, res) {
     const { error } = reviewRequestValidation.validate(body);
     if (error) return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
 
+    const authHeader = req.headers["authorization"];
+    const token = authHeader.split(" ")[1];
+    const payload = jwt.decode(token, process.env.JWT_SECRET);
+    body.reviewerId = payload.id;
+
     const updatedRequest = await reviewRequestService(id, body);
     handleSuccess(res, 200, "Solicitud revisada exitosamente", updatedRequest);
   } catch (error) {
