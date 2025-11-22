@@ -8,6 +8,15 @@ export async function createInscriptionService(data){
     return await inscriptionRepository.save(newInscription);
 }
 
+export async function hasInscriptionToElectiveService(userId, electiveId){
+    const inscriptionRepository = AppDataSource.getRepository(Inscription);
+    const inscription = await inscriptionRepository.find({ where: [{userId, electiveId, estado: "pendiente"}, {userId, electiveId, estado: "aprobado"}]});
+
+    if(inscription.length === 0) return false;
+
+    return true;
+}
+
 export async function getInscriptionService(){
     const inscriptionRepository = AppDataSource.getRepository(Inscription);
 
