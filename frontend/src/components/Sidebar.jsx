@@ -1,7 +1,7 @@
 import { useAuth } from "@context/AuthContext";
 
 // Buscar iconos en -> https://lucide.dev/icons/
-import { GraduationCap, House, MessageSquareText, User, Users } from "lucide-react";
+import { GraduationCap, House, MessageSquareText, User, Users, FilePenLine } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
@@ -22,6 +22,12 @@ const menuItems = [
     icon: Users,
     route: "/users",
     roles: ["administrador"],
+  },
+  {
+    title: "Mis Inscripciones",
+    icon: FilePenLine,
+    route: "/inscription",
+    roles: ["alumno", "jefe_carrera"],
   },
 ];
 
