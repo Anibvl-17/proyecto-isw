@@ -1,5 +1,7 @@
 import { AppDataSource } from "../config/configDb.js";
 import { Inscription } from "../entities/inscription.entity.js";
+import { ElectiveEntity } from "../entities/elective.entity.js";
+import { IsNull, Not } from "typeorm";
 
 export async function createInscriptionService(data){
     const inscriptionRepository = AppDataSource.getRepository(Inscription);
@@ -53,4 +55,17 @@ export async function updateStatusService(id, data){
     if (data.estado === "rechazado") inscription.motivo_rechazo = data.motivo_rechazo;
 
     return await inscriptionRepository.save(inscription);
+}
+
+export async function getElectivesByPrerequisitesService() {
+    const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
+
+    const electives = await electiveRepository.find({
+        where: [
+            { prerrequisites: IsNull() }, 
+            { prerrequisites: "" }         
+        ]
+    });
+
+    return electives.length > 0 ? electives : null;
 }

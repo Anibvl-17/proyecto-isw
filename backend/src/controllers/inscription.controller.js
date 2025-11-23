@@ -4,7 +4,7 @@ import {
     handleSuccess,
 } from "../handlers/responseHandlers.js";
 import { createInscriptionBodyValidation, updateStatusValidation } from "../validations/inscription.validation.js";
-import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService, hasInscriptionToElectiveService } from "../services/inscription.service.js";
+import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService, hasInscriptionToElectiveService, getElectivesByPrerequisitesService } from "../services/inscription.service.js";
 import { getElectivesService } from "../services/elective.service.js";
 import jwt from "jsonwebtoken";
 
@@ -85,7 +85,7 @@ export async function deleteInscriptionId(req, res){
 
         handleSuccess(res, 200, "Inscripcion eliminada exitosamente", inscription); 
     } catch (error) {
-        return handleErrorServer(res, 500, "Error al eliminar la inscripcion", error.message);
+        handleErrorServer(res, 500, "Error al eliminar la inscripcion", error.message);
     }
 }
 
@@ -106,5 +106,19 @@ export async function updateStatus(req, res){
         handleSuccess(res, 200, "Solicitud revisada exitosamente", updateStatus);
     } catch (error) {
         handleErrorServer(res, 500, "Error al revisar la inscripcion", error.message);
+    }
+}
+
+export async function getElectivesByPrerequisites(req, res){
+    try {
+        const electives = await getElectivesByPrerequisitesService();
+
+        if (!electives) {
+            return handleErrorClient(res, 404, "No se encontraron electivos sin requisitos previos.");
+        }
+
+        handleSuccess(res, 200, "Electivos sin requisitos obtenidos exitosamente", electives);
+    } catch (error) {
+        handleErrorServer(res, 500, "Error al obtener los electivos", error.message);
     }
 }
