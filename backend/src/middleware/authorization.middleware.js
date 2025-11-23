@@ -1,96 +1,51 @@
 "use strict";
 
-import { User } from "../entities/user.entity.js";
-import { AppDataSource } from "../config/configDb.js";
+import jwt from "jsonwebtoken";
+import { handleErrorClient, handleErrorServer } from "../handlers/responseHandlers.js";
 
-export async function isAdmin(req, res, next) {
-    try {
-        const userRepository = AppDataSource.getRepository(User);
-        const userFound = await userRepository.findOneBy({
-            email: req.user?.email,
-        });
-        if (!userFound)
-            return res.status(404).json({ message: "Usuario no encontrado" });
+export function getUserRole(req) {
+  const authHeader = req.headers["authorization"];
 
-        const userRole = userFound.role;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.error("No se provee el header de autorización.");
+    return null;
+  }
 
-        if (userRole !== "administrador")
-            return res.status(403).json({
-                message: "Acceso denegado: se requieren privilegios de administrador"
-            });
+  const token = authHeader.split(" ")[1];
 
-        next();
-    } catch (error) {
-        return res.status(500).json({ message: "Error interno del servidor", error });
-
-    }
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    return payload.role;
+  } catch (error) {
+    // Token invalido o expirado
+    return null;
+  }
 }
 
-export async function isTeacher(req, res, next) {
+// Utilizado para mostrar el nombre del rol en el mensaje
+const roleNames = {
+  administrador: "Administrador",
+  jefe_carrera: "Jefe de Carrera",
+  docente: "Docente",
+  alumno: "Alumno",
+};
+
+export function verifyRoles(roles) {
+  return (req, res, next) => {
     try {
-        const userRepository = AppDataSource.getRepository(User);
-        const userFound = await userRepository.findOneBy({
-            email: req.user?.email,
-        });
-        if (!userFound)
-            return res.status(404).json({ message: "Usuario no encontrado" });
+      const userRole = getUserRole(req);
 
-        const userRole = userFound.role;
+      if (!userRole) return handleErrorClient(res, 401, "Token inválido o expirado");
 
-        if (userRole !== "docente")
-            return res.status(403).json({
-                message: "Acceso denegado: se requieren privilegios de docente"
-            });
+      if (!roles.includes(userRole)) {
+        const validRolesNames = roles.map((role) => roleNames[role]).join(", ");
 
-        next();
+        return handleErrorClient(res, 403, `Acceso denegado: se necesitan privilegios de ${validRolesNames}`)
+      }
+
+      next();
     } catch (error) {
-        return res.status(500).json({ message: "Error interno del servidor", error });
-
+      return handleErrorServer(res, 500, "Error interno del servidor", error);
     }
-}
-
-export async function isCareerHead(req, res, next) {
-    try {
-        const userRepository = AppDataSource.getRepository(User);
-        const userFound = await userRepository.findOneBy({
-            email: req.user?.email,
-        });
-        if (!userFound)
-            return res.status(404).json({ message: "Usuario no encontrado" });
-
-        const userRole = userFound.role;
-
-        if (userRole !== "jefe_carrera")
-            return res.status(403).json({
-                message: "Acceso denegado: se requieren privilegios de jefe de carrera"
-            });
-
-        next();
-    } catch (error) {
-        return res.status(500).json({ message: "Error interno del servidor", error });
-
-    }
-}
-
-export async function isStudent(req, res, next) {
-    try {
-        const userRepository = AppDataSource.getRepository(User);
-        const userFound = await userRepository.findOneBy({
-            email: req.user?.email,
-        });
-        if (!userFound)
-            return res.status(404).json({ message: "Usuario no encontrado" });
-
-        const userRole = userFound.role;
-
-        if (userRole !== "alumno")
-            return res.status(403).json({
-                message: "Acceso denegado: se requieren privilegios de alumno"
-            });
-
-        next();
-    } catch (error) {
-        return res.status(500).json({ message: "Error interno del servidor", error });
-
-    }
+  };
 }
