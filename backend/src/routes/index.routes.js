@@ -5,6 +5,7 @@ import electiveRoutes from "./elective.routes.js";
 import inscriptionRoutes from "./inscription.routes.js";
 import requestRoutes from "./request.routes.js";
 import userRoutes from "./user.routes.js";
+import { verifyRoles } from "../middleware/authorization.middleware.js";
 
 export function routerApi(app) {
     const router = Router();
@@ -14,7 +15,7 @@ export function routerApi(app) {
     router.use("/periodos", periodoRoutes);
     router.use("/electives", electiveRoutes);
     router.use("/inscription", inscriptionRoutes);
-    router.use("/requests", requestRoutes);
+    router.use("/requests", verifyRoles(["jefe_carrera", "alumno"]), requestRoutes);
     router.use("/users", userRoutes);
 }
 
