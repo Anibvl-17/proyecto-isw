@@ -201,8 +201,9 @@ const Requests = () => {
               </div>
 
               {/* Historial de solicitudes */}
-              <div className="flex-1 flex flex-col gap-2">
+              <div className="flex-1">
                 <h3 className="text-xl font-semibold mb-4">Historial de solicitudes</h3>
+                <div className="flex flex-col gap-2">
                 {approvedCounter > 0 || rejectedCounter > 0 ? (
                   requests.map((request) => {
                     if (request.status !== "pendiente")
@@ -214,6 +215,7 @@ const Requests = () => {
                     aparecerán aquí
                   </p>
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -248,7 +250,7 @@ const Requests = () => {
                     <tbody>
                       {requests.map((request) => {
                         if (request.status === "pendiente" && showPending)
-                          return <Request key={request.id} request={request} />;
+                          return <Request key={request.id} request={request} fetchCallback={fetchRequests}/>;
 
                         if (request.status === "aprobado" && showApproved)
                           return <Request key={request.id} request={request} />;

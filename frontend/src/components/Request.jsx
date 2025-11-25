@@ -18,7 +18,7 @@ Para jefe de carrera:
 - Las solicitudes se presentan en formato de tabla, así que se devuelve una fila de tabla
 - El atributo isCompact no tiene efecto en este caso.
 */
-export function Request({ request, isCompact = false }) {
+export function Request({ request, isCompact = false, fetchCallback }) {
   const [loading, setLoading] = useState(false);
   const [elective, setElective] = useState(null);
   const [student, setStudent] = useState(null);
@@ -101,6 +101,7 @@ export function Request({ request, isCompact = false }) {
           position: "bottom-end",
           showConfirmButton: false,
         });
+        fetchCallback();
       } else {
         showErrorAlert("Error", "No se pudo revisar la solicitud.");
       }
