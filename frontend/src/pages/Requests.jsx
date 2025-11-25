@@ -181,6 +181,7 @@ const Requests = () => {
               {/* Solicitudes pendientes */}
               <div className="flex-2">
                 <h3 className="text-xl font-semibold mb-4">Solicitudes pendientes</h3>
+                <div className="flex flex-col gap-3">
                 {pendingCounter > 0 ? (
                   requests.map((request) => {
                     if (request.status === "pendiente")
@@ -196,6 +197,7 @@ const Requests = () => {
                     para crear una solicitud de inscripción
                   </p>
                 )}
+                </div>
               </div>
 
               {/* Historial de solicitudes */}
