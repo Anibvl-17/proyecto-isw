@@ -189,7 +189,9 @@ export function Request({ request, isCompact = false, fetchCallback }) {
 
         {/* Estado de solicitud */}
         <td className="min-w-8 p-4 align-middle">
-          <Badge type={getBadgeType()} text={getBadgeText()} showIcon={false} />
+          <div className="flex items-center justify-center">
+            <Badge type={getBadgeType()} text={getBadgeText()} showIcon={false} />
+          </div>
         </td>
 
         {/* Botón de ver detalles */}
