@@ -1,7 +1,7 @@
 import { useAuth } from "@context/AuthContext";
 
 // Buscar iconos en -> https://lucide.dev/icons/
-import { GraduationCap, House, MessageSquareText, User, Users, FilePenLine } from "lucide-react";
+import { GraduationCap, House, MessageSquareText, User, Users, FilePenLine, Bolt, IdCardLanyard, UserCog } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
@@ -43,6 +43,17 @@ export function Sidebar() {
     alumno: "Alumno",
   };
 
+  let Icon;
+  if (user.role === "administrador") {
+    Icon = Bolt;
+  } else if (user.role === "alumno") {
+    Icon = GraduationCap;
+  } else if (user.role === "docente") {
+    Icon = IdCardLanyard;
+  } else if (user.role === "jefe_carrera") {
+    Icon = UserCog;
+  }
+
   return (
     <>
       <aside className="fixed left-0 top-0 z-40 h-screen w-72 bg-blue-600">
@@ -51,7 +62,7 @@ export function Sidebar() {
           <div className="flex items-center gap-3 border-b border-blue-700 px-6 py-5">
             {/* Icono */}
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
-              <GraduationCap className="h-6 w-6 text-blue-600" />
+              <Icon className="h-6 w-6 text-blue-600" />
             </div>
             {/* Texto debajo del icono */}
             <div>
