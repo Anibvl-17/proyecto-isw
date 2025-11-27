@@ -12,12 +12,34 @@ import { electiveBodyValidation } from "../validations/elective.validation.js";
 export async function getAllElectives(req, res) {
     try {
         const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
-        
-        const electives = await electiveRepository.find({
+        const userRole = req.user.role;
+
+        let queryOptions = {
             order: {
                 createdAt: "DESC"
             }
-        });
+        };
+
+        //Filtrar electivos según rol
+        //Jefe de carrera puede ver todos los electivos(independientemente del estado)
+        if (userRole === "jefe_carrera") {
+            
+        } else if (userRole === "docente") {
+            queryOptions.where = [
+                { teacherRut: req.user.rut },
+                { status: "Aprobado" } //Docente ve sus propios electivos y los aprobados
+            ];
+        } else if (userRole === "alumno") {
+            queryOptions.where = {
+                status: "Aprobado" //Alumno solo ve electivos aprobados
+            };
+        } else {
+            queryOptions.where = {
+                status: "Aprobado" //Otros roles solo ven electivos aprobados
+            };
+        }
+        
+        const electives = await electiveRepository.find(queryOptions);
         
         if (!electives || electives.length === 0) {
             return handleErrorClient(res, 404, "No hay electivos disponibles.");
@@ -169,11 +191,16 @@ export async function updateElective(req, res) {
             );
         }
         
-        Object.assign(elective, value);
+        if (value.name !== undefined) elective.name = value.name;
+        if (value.description !== undefined) elective.description = value.description;
+        if (value.objectives !== undefined) elective.objectives = value.objectives;
+        if (value.prerrequisites !== undefined) elective.prerrequisites = value.prerrequisites;
+        if (value.schedule !== undefined) elective.schedule = value.schedule;
+        if (value.quotas !== undefined) elective.quotas = value.quotas;
         
         await electiveRepository.save(elective);
         
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: "Electivo actualizado exitosamente.", 
             data: elective 
         });
