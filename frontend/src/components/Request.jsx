@@ -196,10 +196,10 @@ export function Request({ request, isCompact = false, fetchCallback }) {
 
         {/* Botón de ver detalles */}
         <td className="min-w-8 p-4 align-middle">
-          <div className="flex flex-col items-center justify-center">
+          <div className="flex items-center justify-center">
             <button
               onClick={handleViewDetails}
-              className="px-3 py-0.5 text-sm flex items-center justify-center gap-2 rounded-2xl text-gray-800 font-semibold border transition-all border-gray-500 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:bg-blue-700 active:border-blue-700 active:text-gray-200 active:scale-95"
+              className="px-3 py-0.5 text-sm flex-1 flex items-center justify-center gap-2 rounded-2xl text-gray-800 font-semibold border transition-all border-gray-500 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:bg-blue-700 active:border-blue-700 active:text-gray-200 active:scale-95"
             >
               <Eye className="h-4 w-4" /> Ver
             </button>
