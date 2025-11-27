@@ -18,6 +18,12 @@ const menuItems = [
     roles: ["alumno", "jefe_carrera"],
   },
   {
+    title: "Electivos",
+    icon: GraduationCap,
+    route: "/electives",
+    roles: ["alumno", "docente", "jefe_carrera"],
+  },
+  {
     title: "Usuarios",
     icon: Users,
     route: "/users",
