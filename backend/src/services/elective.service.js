@@ -2,20 +2,6 @@
 
 import { AppDataSource } from "../config/configDb.js";
 import { ElectiveEntity } from "../entities/elective.entity.js";
-import { Periodo } from "../entities/periodo.entity.js";
-
-export async function checkInscriptionPeriodActive() {
-    const periodoRepository = AppDataSource.getRepository(Periodo);
-    const currentDate = new Date();
-    
-    const activePeriod = await periodoRepository.createQueryBuilder("periodo")
-        .where("periodo.fechaInicio <= :currentDate", { currentDate })
-        .andWhere("periodo.fechaCierre >= :currentDate", { currentDate })
-        .andWhere("periodo.visible = :visible", { visible: true })
-        .getOne();
-    
-    return activePeriod !== null;
-}
 
 export async function createElectiveService(data) {
     const electiveRepository = AppDataSource.getRepository(ElectiveEntity);

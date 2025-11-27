@@ -169,11 +169,16 @@ export async function updateElective(req, res) {
             );
         }
         
-        Object.assign(elective, value);
+        if (value.name !== undefined) elective.name = value.name;
+        if (value.description !== undefined) elective.description = value.description;
+        if (value.objectives !== undefined) elective.objectives = value.objectives;
+        if (value.prerrequisites !== undefined) elective.prerrequisites = value.prerrequisites;
+        if (value.schedule !== undefined) elective.schedule = value.schedule;
+        if (value.quotas !== undefined) elective.quotas = value.quotas;
         
         await electiveRepository.save(elective);
         
-        res.status(200).json({ 
+        return res.status(200).json({ 
             message: "Electivo actualizado exitosamente.", 
             data: elective 
         });
