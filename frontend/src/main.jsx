@@ -10,6 +10,7 @@ import '@styles/styles.css';
 import Logout from './pages/Logout'
 import Users from '@pages/Users'
 import Requests from './pages/Requests'
+import Electives from '@pages/elective'
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,14 @@ const router = createBrowserRouter([
           // Verificar roles alumno y jefe carrera
           <ProtectedRoute>
             <Requests />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/electives",
+        element: (
+          <ProtectedRoute>
+            <Electives />
           </ProtectedRoute>
         )
       },
