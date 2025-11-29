@@ -1,14 +1,14 @@
 import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
-import { Calendar, Pencil, Trash2, Eye, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen } from "lucide-react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 
-export function Elective({ 
-  elective, 
-  isCompact = false, 
-  onEdit, 
-  onDelete 
+export function Elective({
+  elective,
+  isCompact = false,
+  onEdit,
+  onDelete
 }) {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
@@ -40,6 +40,16 @@ export function Elective({
     }
   };
 
+  const getAvailabilityBadge = () => {
+    const availableQuotas = elective.quotas;
+
+    if (availableQuotas > 0) {
+      return { text: "Disponible", color: "bg-green-100 text-green-700" };
+    } else {
+      return { text: "Sin cupos", color: "bg-red-100 text-red-700" };
+    }
+  };
+
   const handleViewDetails = async () => {
     try {
       await electiveDetailsDialog(elective, isAlumno, isJefeCarrera);
@@ -58,52 +68,68 @@ export function Elective({
 
   // Tarjetas para alumnos
   const cardAlumno = () => {
+
+    const availability = getAvailabilityBadge();
+
     return (
-      <div className="border border-gray-300 px-6 py-4 rounded-md transition-all hover:shadow-md hover:border-gray-400">
-        <div className="flex flex-row justify-between items-start">
-          <div className="flex-1">
-            <div className="flex flex-row gap-4 justify-start items-center mb-2">
-              <span className="font-semibold text-lg">{elective.name}</span>
-              <Badge type={getBadgeType()} text={getBadgeText()} showIcon={false} />
-            </div>
-
-            {!isCompact && (
-              <div className="text-sm text-gray-600 mb-3">{elective.description}</div>
-            )}
-
-            <div className="flex flex-col gap-1 text-sm text-gray-600">
-              <div className="flex flex-row gap-2 items-center">
-                <Calendar className="h-4 w-4" />
-                <span>Horario: {elective.schedule}</span>
-              </div>
-              <div className="flex flex-row gap-2 items-center">
-                <Users className="h-4 w-4" />
-                <span>Cupos: {elective.quotas}</span>
-              </div>
-            </div>
-
-            {!isCompact && elective.objectives && (
-              <div className="mt-3">
-                <p className="text-sm font-semibold text-gray-700">Objetivos:</p>
-                <p className="text-sm text-gray-600">{elective.objectives}</p>
-              </div>
-            )}
-            {!isCompact && elective.prerrequisites && (
-              <div className="mt-3">
-                <p className="text-sm font-semibold text-gray-700">Prerrequisitos:</p>
-                <p className="text-sm text-gray-600">{elective.prerrequisites}</p>
-              </div>
-            )}
+      <div className="border border-gray-300 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-gray-400 bg-white">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex flex-row justify-between items-start mb-3">
+            <h3 className="font-bold text-x1 text-gray-900 flex-1 pr-4">
+              {elective.name}
+            </h3>
+            <span className={'px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap ${availability.color}'}> {availability.text} </span>
           </div>
 
-          {isCompact && (
-            <button
-              onClick={handleViewDetails}
-              className="px-3 py-1.5 text-sm flex items-center justify-center gap-2 rounded-lg text-gray-800 font-medium border transition-all border-gray-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 active:bg-blue-700 active:scale-95"
-            >
-              <Eye className="h-4 w-4" /> Ver más
-            </button>
-          )}
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
+            <Calendar className="h-4 w-4" />
+            <span>2025-1</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-sm text-gray-600">
+            <Clock className="h-4 w-4" />
+            <span>{elective.schedule}</span>
+          </div>
+        </div>
+
+        <div className="px-6 py-4">
+          <div className="flex items-center gap-2 text-sm mb-3">
+            <Users className="h-4 w-4 text-blue-600" />
+            <span className="text-gray-700">
+              <span className="font-semibold text-blue-600">{elective.quotas}</span> de {elective.quotas} cupos disponibles
+            </span>
+          </div>
+
+          <div className="flex items-start gap-2 text-sm">
+            <CheckCircle className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <span className="font-medium text-gray-700">Pre-requisitos:</span>
+              <div className="flex flex-wrap gap-2 mt-1.5">
+                {elective.prerrequisites && elective.prerrequisites.trim() !== "" ? (
+                  elective.prerrequisites.split(',').map((prereq, index) => (
+                    <span
+                      key={index}
+                      className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded border border-gray-300"
+                    >
+                      {prereq.trim()}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-500 italic text-xs">Ninguno</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 px-6 py-3.5 border-t border-gray-200">
+          <button
+            onClick={handleViewDetails}
+            className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg transition-all hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <BookOpen className="h-4 w-4" />
+            Ver Detalles
+          </button>
         </div>
       </div>
     );
@@ -119,6 +145,18 @@ export function Elective({
         <td className="px-4 py-3 align-middle">
           <span className="text-sm text-gray-700 line-clamp-2">
             {elective.description}
+          </span>
+        </td>
+
+        <td className="px-4 py-3 align-middle">
+          <span className="text-sm text-gray-700 line-clamp-2">
+            {elective.objectives}
+          </span>
+        </td>
+
+        <td className="px-4 py-3 align-middle">
+          <span className="text-sm text-gray-700 line-clamp-2">
+            {elective.prerrequisites || "Ninguno"}
           </span>
         </td>
 
@@ -258,14 +296,14 @@ async function electiveDetailsDialog(elective, isAlumno, isJefeCarrera) {
       "</div>" +
       (isJefeCarrera
         ? '<div class="bg-purple-50 border border-purple-200 rounded-md p-3">' +
-          '<p class="font-bold text-sm text-gray-800 mb-2">Docente Responsable</p>' +
-          '<p class="text-sm text-gray-800">' +
-          '<span class="text-gray-600">RUT: </span>' +
-          '<span class="font-semibold">' +
-          elective.teacherRut +
-          "</span>" +
-          "</p>" +
-          "</div>"
+        '<p class="font-bold text-sm text-gray-800 mb-2">Docente Responsable</p>' +
+        '<p class="text-sm text-gray-800">' +
+        '<span class="text-gray-600">RUT: </span>' +
+        '<span class="font-semibold">' +
+        elective.teacherRut +
+        "</span>" +
+        "</p>" +
+        "</div>"
         : "") +
       "</div>" +
       "</div>",
