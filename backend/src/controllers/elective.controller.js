@@ -41,11 +41,10 @@ export async function getAllElectives(req, res) {
         
         const electives = await electiveRepository.find(queryOptions);
         
-        if (!electives || electives.length === 0) {
-            return handleErrorClient(res, 404, "No hay electivos disponibles.");
-        }
-        
-        res.status(200).json({ message: "Electivos encontrados:", data: electives });
+        res.status(200).json({ 
+            message: electives.length === 0 ? "No hay electivos disponibles." : "Electivos encontrados:", 
+            data: electives 
+        });
     } catch (error) {
         return handleErrorServer(res, 500, error.message);
     }
@@ -242,7 +241,7 @@ export async function deleteElective(req, res) {
             );
         }
         
-        await electiveRepository.remove(elective);
+        await electiveRepository.delete({ id: parseInt(id) });
         
         res.status(200).json({ 
             message: "Electivo eliminado exitosamente." 
@@ -252,7 +251,6 @@ export async function deleteElective(req, res) {
         return handleErrorServer(res, 500, error.message);
     }
 }
-
 
 
 
