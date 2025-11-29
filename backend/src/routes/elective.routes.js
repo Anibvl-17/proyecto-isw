@@ -7,7 +7,7 @@ import {
     getElectiveById,
     createElective,
     updateElective,
-    deleteElective
+    deleteElective,
 } from "../controllers/elective.controller.js";
 
 const router = Router();
