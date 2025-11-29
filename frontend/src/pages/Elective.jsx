@@ -10,6 +10,7 @@ import { useAuth } from "@context/AuthContext";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Badge } from "@components/Badge";
+import { Elective } from "@components/Elective";
 import { CheckCircle, PlusCircle, Pencil, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -114,54 +115,46 @@ const Electives = () => {
                         {!loading && electives.length === 0 && (<p className="text-gray-600 italic w-full flex flex-row gap-3 items-center"><CheckCircle className="h-5 w-5" />No hay electivos disponibles.</p>)}
                         {!loading && electives.length > 0 && (<Badge type="info" text={`${electives.length} electivo${electives.length > 1 ? "s" : ""}`} />)}
                     </div>
-                    {!loading && electives.length > 0 && (
-                        <div className="w-full overflow-auto border border-gray-300 rounded-lg">
+                    {!loading && electives.length > 0 && isAlumno &&(
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {electives.map((elective) => (
+                                <Elective 
+                                    key={elective.id} 
+                                    elective={elective}
+                                />
+                            ))} 
+                        </div>
+                    )}
+                    {!loading && electives.length > 0 && (isDocente || isJefeCarrera) && (
+                        <div className="w-full border border-gray-300 rounded-lg">
                             <table className="w-full caption-bottom text-sm">
                                 <thead className="border-b border-gray-300 bg-gray-50">
                                     <tr>
                                         <th className="min-w-32 h-12 px-4 text-left font-medium">Nombre</th>
                                         <th className="min-w-40 h-12 px-4 text-left font-medium">Descripción</th>
-                                        <th className="min-w-48 h-12 px-4 text-left font-medium">Objetivos</th>
+                                        <th className="min-w-40 h-12 px-4 text-left font-medium">Objetivos</th>
                                         <th className="min-w-40 h-12 px-4 text-left font-medium">Prerrequisitos</th>
                                         <th className="min-w-32 h-12 px-4 text-left font-medium">Horario</th>
                                         <th className="min-w-20 h-12 px-4 text-center font-medium">Cupos</th>
-                                        {(isJefeCarrera || isDocente) && (<th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>)}
-                                        {isDocente && (<th className="min-w-24 h-12 px-4 text-center font-medium">Acciones</th>)}
+                                        {(isJefeCarrera || isDocente) && (
+                                            <th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>
+                                        )}
+                                        {isDocente && (
+                                            <th className="min-w-24 h-12 px-4 text-center font-medium">Acciones</th>
+                                        )}
+                                        {isJefeCarrera && (
+                                            <th className="min-w-24 h-12 px-4 text-center font-medium">Detalles</th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {electives.map((elective) => (
-                                        <tr key={elective.id} className="border-b border-gray-200 last:border-b-0">
-                                            <td className="px-4 py-3 align-middle font-medium">{elective.name}</td>
-                                            <td className="px-4 py-3 align-middle text-gray-700">{elective.description}</td>
-                                            <td className="px-4 py-3 align-middle text-gray-700">
-                                                <div className="text-sm text-gray-700 line-clamp-2">{elective.objectives}</div>
-                                            </td>
-                                            <td className="px-4 py-3 align-middle text-gray-700">
-                                                <div className="text-sm text-gray-700 line-clamp-2">{elective.prerrequisites || "Ninguno"}</div>
-                                            </td>
-                                            <td className="px-4 py-3 align-middle text-gray-700">{elective.schedule}</td>
-                                            <td className="px-4 py-3 align-middle text-center">{elective.quotas}</td>
-                                            {(isJefeCarrera || isDocente) && (<td className="px-4 py-3 align-middle text-center">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                    elective.status === "Aprobado"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : elective.status === "Rechazado"
-                                                    ? "bg-red-100 text-red-700"
-                                                    : "bg-yellow-100 text-yellow-700"
-                                                }`}>
-                                                    {elective.status}
-                                                </span>
-                                            </td>)}
-                                            {isDocente && (
-                                                <td className="px-4 py-3 align-middle text-center">
-                                                    <div className="flex flex-row gap-2 justify-center">
-                                                        <button onClick={() => handleEditElective(elective)} className="text-blue-700 hover:text-blue-900 inline-flex items-center justify-center" title="Editar electivo"><Pencil className="h-4 w-4" /></button>
-                                                        <button onClick={() => handleDeleteElective(elective)} className="text-red-600 hover:text-red-800 inline-flex items-center justify-center" title="Eliminar electivo"><Trash2 className="h-4 w-4" /></button>
-                                                    </div>
-                                                </td>
-                                            )}
-                                        </tr>
+                                        <Elective
+                                            key={elective.id}
+                                            elective={elective}
+                                            onEdit={handleEditElective}
+                                            onDelete={handleDeleteElective}
+                                        />
                                     ))}
                                 </tbody>
                             </table>
