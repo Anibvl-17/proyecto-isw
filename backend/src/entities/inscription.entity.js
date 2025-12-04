@@ -29,6 +29,11 @@ export const Inscription = new EntitySchema({
             type: String,
             nullable: true,
         },
+        reviewedAt: {
+            type: "timestamp",
+            nullable: true,
+            default: null
+    },
         createdAt: {
             type: "timestamp",
             default: () => "CURRENT_TIMESTAMP",
