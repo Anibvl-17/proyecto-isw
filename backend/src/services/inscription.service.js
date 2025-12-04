@@ -51,6 +51,7 @@ export async function updateStatusService(id, data){
     if (!inscription) throw new Error("Inscripción no encontrada");
 
     inscription.estado = data.estado;
+    inscription.reviewedAt = new Date();
 
     if (data.estado === "rechazado") inscription.motivo_rechazo = data.motivo_rechazo;
 

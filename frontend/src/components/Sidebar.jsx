@@ -29,11 +29,17 @@ const menuItems = [
     route: "/users",
     roles: ["administrador"],
   },
-  {
+  { // Inscripciones para alumno
     title: "Mis Inscripciones",
     icon: FilePenLine,
     route: "/inscription",
-    roles: ["alumno", "jefe_carrera"],
+    roles: ["alumno"],
+  },
+  { // Inscripciones para docente
+    title: "Gestión de Inscripciones",
+    icon: FilePenLine,
+    route: "/inscription",
+    roles: ["docente"],
   },
 ];
 
