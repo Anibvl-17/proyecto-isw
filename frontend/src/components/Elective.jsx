@@ -1,7 +1,8 @@
 import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
-import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen } from "lucide-react";
+import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle} from "lucide-react";
 import { useState } from "react";
+import { createInscription } from "@services/inscription.service";
 import Swal from "sweetalert2";
 
 export function Elective({
@@ -58,6 +59,49 @@ export function Elective({
     }
   };
 
+  const handleInscription = async () => {
+    const confirm = await Swal.fire({
+      title: "¿Inscribir electivo?",
+      text: `¿Deseas solicitar inscripción en ${elective.name}?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, inscribirme",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "oklch(52.7% 0.154 150.069)", 
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const response = await createInscription({ electiveId: elective.id });
+
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Solicitud enviada",
+          text: response.message,
+          timer: 3000,
+          showConfirmButton: false
+        });
+        
+        if (onEdit) onEdit();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.message,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo procesar la inscripción",
+      });
+    }
+  };
+
   const handleEdit = () => {
     if (onEdit) onEdit(elective);
   };
@@ -70,6 +114,7 @@ export function Elective({
   const cardAlumno = () => {
 
     const availability = getAvailabilityBadge();
+    const hasQuotas = elective.quotas > 0;
 
     return (
       <div className="border border-gray-300 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-gray-400 bg-white">
@@ -122,14 +167,26 @@ export function Elective({
           </div>
         </div>
 
-        <div className="bg-gray-50 px-6 py-3.5 border-t border-gray-200">
+        <div className="bg-gray-50 px-6 py-3.5 border-t border-gray-200 grid grid-cols-2 gap-3">
           <button
             onClick={handleViewDetails}
-            className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg transition-all hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg transition-all hover:bg-gray-100 hover:border-gray-400 active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <BookOpen className="h-4 w-4" />
             Ver Detalles
           </button>
+
+          <button
+                onClick={handleInscription}
+                disabled={!hasQuotas}
+                className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 
+                    ${hasQuotas 
+                        ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md' 
+                        : 'bg-gray-400 cursor-not-allowed'}`}
+            >
+                <PlusCircle className="h-4 w-4" />
+                {hasQuotas ? "Inscribirse" : "Sin cupos"}
+            </button>
         </div>
       </div>
     );
@@ -242,10 +299,13 @@ async function electiveDetailsDialog(elective, isAlumno, isJefeCarrera) {
     html:
       '<div class="text-start">' +
       '<p class="font-semibold text-xl mb-1 text-black">Detalles del Electivo</p>' +
-      '<p class="text-sm text-gray-600 mb-4">' +
-      "Creado el " +
-      dateFormatter(elective.createdAt) +
-      "</p>" +
+
+      (!isAlumno
+        ? '<p class="text-sm text-gray-600 mb-4">' +
+          "Creado el " + dateFormatter(elective.createdAt) +
+          "</p>"
+        : '<div class="mb-4"></div>') +
+      
       '<div class="flex flex-col gap-3">' +
       '<div class="bg-blue-50 border border-blue-200 rounded-md p-3">' +
       '<p class="font-bold text-sm text-gray-800 mb-2">Información General</p>' +
@@ -256,12 +316,16 @@ async function electiveDetailsDialog(elective, isAlumno, isJefeCarrera) {
       elective.name +
       "</span>" +
       "</p>" +
-      '<p class="text-sm text-gray-800">' +
-      '<span class="text-gray-600">Estado: </span>' +
-      '<span class="font-semibold">' +
-      elective.status +
-      "</span>" +
-      "</p>" +
+
+      (!isAlumno
+        ? '<p class="text-sm text-gray-800">' +
+          '<span class="text-gray-600">Estado: </span>' +
+          '<span class="font-semibold">' +
+          elective.status +
+          "</span>" +
+          "</p>" 
+        : "") +
+
       '<p class="text-sm text-gray-800">' +
       '<span class="text-gray-600">Horario: </span>' +
       '<span class="font-semibold">' +
