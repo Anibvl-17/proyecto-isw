@@ -156,10 +156,14 @@ const Inscriptions = () => {
                         <th className="min-w-10 h-12 px-4 text-center align-middle font-medium">
                           Estado
                         </th>
-                        <th className="min-w-10 h-12 px-4 text-right align-middle font-medium">
+                        <th className="min-w-10 h-12 px-4 text-center align-middle font-medium">
                           Detalles
                         </th>
+                        <th className="min-w-10 h-12 px-4 text-center align-middle font-medium">
+                          Acciones
+                        </th>
                       </tr>
+                      
                     </thead>
                     <tbody>
                       {inscriptions.map((inscription) => {

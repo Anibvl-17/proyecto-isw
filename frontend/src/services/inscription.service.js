@@ -85,7 +85,7 @@ export async function deleteInscription(id) {
     }
 }
 
-export async function getElectivesWithoutPrerequisites() {
+export async function getElectivesByPrerequisites() {
     try {
         const response = await axios.get("/inscription/filter");
         return {

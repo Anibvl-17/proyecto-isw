@@ -11,15 +11,17 @@ import jwt from "jsonwebtoken";
 export async function createInscription(req, res){//Ver bien como implementar que e jefe de carrera peda inscribir a un alumno a electivo ya que se puede dar el alumno caso de que no pueda 
                                                     //Inscribirse porque estan los cupos llenos entonces el jede de carrera podria hacerlo
     try {
-        const data = req.body;
+        const authHeader = req.headers["authorization"];
+        if (!authHeader) return handleErrorClient(res, 401, "No autorizado", "No se proporcionó token");
+
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.decode(token, process.env.JWT_SECRET);
+
+        const data = {...req.body, userId: payload.id};
+        
         const { error } = createInscriptionBodyValidation.validate(data);
 
         if(error) return handleErrorClient(res, 400, "Parametros invalidos", error.message);
-
-        const authHeader = req.headers["authorization"];
-        const token = authHeader.split(" ")[1];
-        const payload = jwt.decode(token, process.env.JWT_SECRET);
-        data.userId = payload.id;
 
         const hasInscription = await hasInscriptionToElectiveService(payload.id, data.electiveId);
         if(hasInscription) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");

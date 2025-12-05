@@ -5,18 +5,20 @@ import {
     updateElective,
     deleteElective,
 } from "@services/elective.service";
+import { getElectivesByPrerequisites } from "@services/inscription.service";
 import { showErrorAlert } from "@helpers/sweetAlert";
 import { useAuth } from "@context/AuthContext";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Badge } from "@components/Badge";
 import { Elective } from "@components/Elective";
-import { CheckCircle, PlusCircle, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle, PlusCircle, Pencil, Trash2, Filter, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 const Electives = () => {
     const [loading, setLoading] = useState(false);
     const [electives, setElectives] = useState([]);
+    const [isFilterActive, setIsFilterActive] = useState(false);
     const { user } = useAuth();
     const isDocente = user.role === "docente";
     const isAlumno = user.role === "alumno";
@@ -47,7 +49,7 @@ const Electives = () => {
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
         } catch (error) {
-            showErrorAlert("Error", "No se pudo crear el electivo");
+            showErrorAlert("Error", "No se pudo crear el electivo", error);
         }
     };
 
@@ -61,7 +63,7 @@ const Electives = () => {
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
         } catch (error) {
-            showErrorAlert("Error", "No se pudo actualizar el electivo");
+            showErrorAlert("Error", "No se pudo actualizar el electivo", error);
         }
     };
 
@@ -87,6 +89,40 @@ const Electives = () => {
         }
     };
 
+    const handleFilterToggle = async () => {
+        setLoading(true);
+        try {
+            if (isFilterActive) {
+                // Si el filtro estaba activo, lo desactivamos y volvemos a cargar TODOS
+                await fetchElectives();
+                setIsFilterActive(false);
+            } else {
+                // Si el filtro estaba inactivo, llamamos al servicio de pero Sin Requisitos
+                const result = await getElectivesByPrerequisites();
+                if (result.success) {
+                    setElectives(result.data || []);
+                    setIsFilterActive(true);
+                    
+                    Swal.fire({
+                        toast: true,
+                        title: "Filtro aplicado: Sin requisitos",
+                        icon: "info",
+                        timer: 2000,
+                        position: "bottom-end",
+                        showConfirmButton: false
+                    });
+                } else {
+                    showErrorAlert("Error", result.message);
+                }
+            }
+        } catch (error) {
+            console.error("Error al filtrar:", error);
+            showErrorAlert("Error", "No se pudo aplicar el filtro");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <Header />
@@ -108,8 +144,26 @@ const Electives = () => {
                                 )}
                             </p>
                         </div>
-                        {isDocente && (<button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md"><PlusCircle className="h-4 w-4" />Nuevo electivo</button>)}
+                        
+                        <div className="flex gap-3">
+                            {(isAlumno || isJefeCarrera) && (
+                                <button 
+                                    onClick={handleFilterToggle}
+                                    className={`font-medium text-sm px-4 py-2 flex flex-row items-center gap-2 rounded-lg transition-all border
+                                        ${isFilterActive 
+                                            ? "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200"
+                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                        }`}
+                                >
+                                    {isFilterActive ? <X className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+                                    {isFilterActive ? "Quitar filtro" : "Sin requisitos"}
+                                </button>
+                            )}
+
+                            {isDocente && (<button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md"><PlusCircle className="h-4 w-4" />Nuevo electivo</button>)}
+                        </div>
                     </div>
+
                     <div className="flex flex-row flex-1 gap-4 justify-start items-center">
                         {loading && <Badge text="Cargando" />}
                         {!loading && electives.length === 0 && (<p className="text-gray-600 italic w-full flex flex-row gap-3 items-center"><CheckCircle className="h-5 w-5" />No hay electivos disponibles.</p>)}
@@ -121,6 +175,7 @@ const Electives = () => {
                                 <Elective 
                                     key={elective.id} 
                                     elective={elective}
+                                    onEdit={fetchElectives}
                                 />
                             ))} 
                         </div>
