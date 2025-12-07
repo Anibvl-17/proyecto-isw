@@ -37,6 +37,11 @@ export async function getElectiveByIdService(id) {
 export async function updateElectiveService(id, data) {
     const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
     const elective = await getElectiveByIdService(id);
+
+    if (elective.status === "Rechazado") {
+        data.status = "Pendiente";
+    }
+
     electiveRepository.merge(elective, data);
     return await electiveRepository.save(elective);
 }
