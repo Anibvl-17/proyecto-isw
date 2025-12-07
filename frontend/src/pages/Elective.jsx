@@ -165,6 +165,8 @@ const Electives = () => {
             await fetchElectives();
         } else {
             showErrorAlert("Error", response.message || "No se pudo cambiar el estado");
+        }
+    }
 
     const handleFilterToggle = async () => {
         setLoading(true);
