@@ -1,7 +1,18 @@
 import { useAuth } from "@context/AuthContext";
 
 // Buscar iconos en -> https://lucide.dev/icons/
-import { GraduationCap, House, MessageSquareText, User, Users, FilePenLine, Bolt, IdCardLanyard, UserCog } from "lucide-react";
+import {
+  GraduationCap,
+  House,
+  MessageSquareText,
+  User,
+  Users,
+  FilePenLine,
+  Bolt,
+  IdCardLanyard,
+  UserCog,
+  CalendarRange
+} from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
@@ -10,6 +21,12 @@ const menuItems = [
     icon: House,
     route: "/home",
     roles: ["alumno", "administrador", "docente", "jefe_carrera"],
+  },
+  {
+    title: "Periodos",
+    icon: CalendarRange,
+    route: "/periodos",
+    roles: ["jefe_carrera", "administrador"],
   },
   {
     title: "Solicitudes",
@@ -29,13 +46,13 @@ const menuItems = [
     route: "/users",
     roles: ["administrador"],
   },
-  { // Inscripciones para alumno
+  {
     title: "Mis Inscripciones",
     icon: FilePenLine,
     route: "/inscription",
     roles: ["alumno"],
   },
-  { // Inscripciones para docente
+  {
     title: "Gestión de Inscripciones",
     icon: FilePenLine,
     route: "/inscription",
@@ -44,7 +61,6 @@ const menuItems = [
 ];
 
 export function Sidebar() {
-  // useLocation().pathname permite obtener la ruta actual
   const location = useLocation().pathname;
 
   const { user } = useAuth();
@@ -70,12 +86,15 @@ export function Sidebar() {
     <>
       <aside className="fixed left-0 top-0 z-40 h-screen w-72 bg-blue-600">
         <div className="flex h-full flex-col">
+
           {/* Logo superior */}
           <div className="flex items-center gap-3 border-b border-blue-700 px-6 py-5">
+
             {/* Icono */}
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
-              <Icon className="h-6 w-6 text-blue-600" />
+              {Icon && <Icon className="h-6 w-6 text-blue-600" />}
             </div>
+
             {/* Texto debajo del icono */}
             <div>
               <h1 className="text-lg font-bold text-white">Portal</h1>
@@ -85,10 +104,8 @@ export function Sidebar() {
 
           {/* Menu de navegación */}
           <nav className="flex-1 space-y-1 px-3 py-4">
-            {/* Crea los items según menuItems */}
             {menuItems.map((item) => {
-              // Verifica si la ruta incluye al rol del usuario
-              if (!item.roles.includes(user.role)) return;
+              if (!item.roles.includes(user.role)) return null;
 
               const Icon = item.icon;
               const isActive = location === item.route;
@@ -112,18 +129,18 @@ export function Sidebar() {
 
           {/* Item de perfil */}
           <div className="space-y-1 px-3 py-4">
-          <NavLink
-            key="/profile"
-            to="/profile"
-            className={
-              location === "/profile"
-                ? "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-blue-700 text-white"
-                : "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-100 transition-colors hover:bg-blue-700/50 hover:text-white"
-            }
-          >
-            <User className="h-5 w-5" />
-            Mi perfil
-          </NavLink>
+            <NavLink
+              key="/profile"
+              to="/profile"
+              className={
+                location === "/profile"
+                  ? "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-blue-700 text-white"
+                  : "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-blue-100 transition-colors hover:bg-blue-700/50 hover:text-white"
+              }
+            >
+              <User className="h-5 w-5" />
+              Mi perfil
+            </NavLink>
           </div>
         </div>
       </aside>
