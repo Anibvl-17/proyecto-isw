@@ -133,7 +133,7 @@ const Requests = () => {
           <div className="flex flex-row flex-1 gap-4 justify-start items-center">
             {loading && <Badge text="Cargando" />}
 
-            {requests.length === 0 && (
+            {isAlumno && requests.length === 0 && (
               <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
                 Haz click en el botón
                 <span className="text-gray-600 border border-dashed border-gray-400 font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg">
@@ -141,6 +141,12 @@ const Requests = () => {
                   Nueva Solicitud
                 </span>
                 para crear una solicitud de inscripción
+              </p>
+            )}
+
+            {!isAlumno && requests.length === 0 && (
+              <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
+                <CheckCircle /> No hay solicitudes por revisar
               </p>
             )}
 
