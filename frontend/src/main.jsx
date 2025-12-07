@@ -11,6 +11,7 @@ import Logout from './pages/Logout'
 import Users from '@pages/Users'
 import Requests from './pages/Requests'
 import Electives from '@pages/elective'
+import Periodos from '@pages/Periodos'
 
 const router = createBrowserRouter([
   {
@@ -23,11 +24,11 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
-        path: '/auth',
+        path: "/auth",
         element: <Login />
       },
       {
-        path: '/logout',
+        path: "/logout",
         element: <Logout />
       },
       {
@@ -41,9 +42,16 @@ const router = createBrowserRouter([
       {
         path: "/requests",
         element: (
-          // Verificar roles alumno y jefe carrera
           <ProtectedRoute>
             <Requests />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/periodos",
+        element: (
+          <ProtectedRoute allowedRoles={["jefe_carrera", "administrador"]}>
+            <Periodos />
           </ProtectedRoute>
         )
       },
@@ -58,7 +66,6 @@ const router = createBrowserRouter([
       {
         path: "/users",
         element: (
-          // Verificar rol de admin!
           <ProtectedRoute>
             <Users />
           </ProtectedRoute>
