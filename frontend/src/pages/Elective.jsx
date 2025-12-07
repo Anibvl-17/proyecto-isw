@@ -6,18 +6,20 @@ import {
     deleteElective,
     changeElectiveStatus,
 } from "@services/elective.service";
+import { getElectivesByPrerequisites } from "@services/inscription.service";
 import { showErrorAlert } from "@helpers/sweetAlert";
 import { useAuth } from "@context/AuthContext";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Badge } from "@components/Badge";
 import { Elective } from "@components/Elective";
-import { CheckCircle, PlusCircle, Pencil, Trash2, Eye } from "lucide-react";
+import { CheckCircle, PlusCircle, Pencil, Trash2, Eye, Filter, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 const Electives = () => {
     const [loading, setLoading] = useState(false);
     const [electives, setElectives] = useState([]);
+    const [isFilterActive, setIsFilterActive] = useState(false);
     const { user } = useAuth();
     const isDocente = user.role === "docente";
     const isAlumno = user.role === "alumno";
@@ -48,7 +50,7 @@ const Electives = () => {
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
         } catch (error) {
-            showErrorAlert("Error", "No se pudo crear el electivo");
+            showErrorAlert("Error", "No se pudo crear el electivo", error);
         }
     };
 
@@ -62,7 +64,7 @@ const Electives = () => {
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
         } catch (error) {
-            showErrorAlert("Error", "No se pudo actualizar el electivo");
+            showErrorAlert("Error", "No se pudo actualizar el electivo", error);
         }
     };
 
@@ -87,7 +89,7 @@ const Electives = () => {
             showErrorAlert("Error", "No se pudo eliminar el electivo");
         }
     };
-
+  
     const handleViewDetails = async (elective) => {
         const isPendiente = elective.status === "Pendiente";
 
@@ -163,6 +165,38 @@ const Electives = () => {
             await fetchElectives();
         } else {
             showErrorAlert("Error", response.message || "No se pudo cambiar el estado");
+
+    const handleFilterToggle = async () => {
+        setLoading(true);
+        try {
+            if (isFilterActive) {
+                // Si el filtro estaba activo, lo desactivamos y volvemos a cargar TODOS
+                await fetchElectives();
+                setIsFilterActive(false);
+            } else {
+                // Si el filtro estaba inactivo, llamamos al servicio de pero Sin Requisitos
+                const result = await getElectivesByPrerequisites();
+                if (result.success) {
+                    setElectives(result.data || []);
+                    setIsFilterActive(true);
+                    
+                    Swal.fire({
+                        toast: true,
+                        title: "Filtro aplicado: Sin requisitos",
+                        icon: "info",
+                        timer: 2000,
+                        position: "bottom-end",
+                        showConfirmButton: false
+                    });
+                } else {
+                    showErrorAlert("Error", result.message);
+                }
+            }
+        } catch (error) {
+            console.error("Error al filtrar:", error);
+            showErrorAlert("Error", "No se pudo aplicar el filtro");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -187,13 +221,25 @@ const Electives = () => {
                                 )}
                             </p>
                         </div>
-                        {isDocente && (
-                            <button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md">
-                                <PlusCircle className="h-4 w-4" />
-                                Nuevo electivo
-                            </button>
-                        )}
+                        <div className="flex gap-3">
+                            {(isAlumno || isJefeCarrera) && (
+                                <button 
+                                    onClick={handleFilterToggle}
+                                    className={`font-medium text-sm px-4 py-2 flex flex-row items-center gap-2 rounded-lg transition-all border
+                                        ${isFilterActive 
+                                            ? "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200"
+                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                        }`}
+                                >
+                                    {isFilterActive ? <X className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+                                    {isFilterActive ? "Quitar filtro" : "Sin requisitos"}
+                                </button>
+                            )}
+
+                            {isDocente && (<button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md"><PlusCircle className="h-4 w-4" />Nuevo electivo</button>)}
+                        </div>
                     </div>
+
                     <div className="flex flex-row flex-1 gap-4 justify-start items-center">
                         {loading && <Badge text="Cargando" />}
                         {!loading && electives.length === 0 && (
@@ -209,8 +255,12 @@ const Electives = () => {
                     {!loading && electives.length > 0 && isAlumno && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {electives.map((elective) => (
-                                <Elective key={elective.id} elective={elective} />
-                            ))}
+                                <Elective 
+                                    key={elective.id} 
+                                    elective={elective}
+                                    onEdit={fetchElectives}
+                                />
+                            ))} 
                         </div>
                     )}
                     {!loading && electives.length > 0 && (isDocente || isJefeCarrera) && (
