@@ -1,4 +1,4 @@
-import axios from "@services/root.service";
+import { getElectiveById } from "@services/elective.service"
 import { showErrorAlert } from "@helpers/sweetAlert";
 import { reviewRequest } from "@services/request.service";
 import { getUserById } from "@services/user.service";
@@ -221,24 +221,6 @@ export function Request({ request, isCompact = false, fetchCallback }) {
     return cardAlumno();
   } else if (isJefeCarrera) {
     return trJefeCarrera();
-  }
-}
-
-// Esta funcion debe implementarse en los services!
-async function getElectiveById(id) {
-  try {
-    const response = await axios.get(`/electives/${id}`);
-
-    return {
-      success: true,
-      data: response.data.data,
-    };
-  } catch (error) {
-    console.error("Error en el servicio de getElectiveById():", error);
-    return {
-      success: false,
-      message: error.response?.data?.message || "Error al conectar con el servidor",
-    };
   }
 }
 
