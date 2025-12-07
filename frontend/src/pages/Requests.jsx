@@ -264,7 +264,7 @@ const Requests = () => {
               </div>
             </div>
           )) ||
-            (requests.length === 0 && (
+            (!loading && !isAlumno && requests.length === 0 && (
               <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
                 <CheckCircle className="h-5 w-5" /> No hay solicitudes por revisar
               </p>
