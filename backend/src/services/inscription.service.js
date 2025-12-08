@@ -40,6 +40,16 @@ export async function deleteInscriptionIdService(id){
 
     if(!inscription) return false;
 
+    if (inscription.estado === "aprobado") {
+        const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
+        const elective = await electiveRepository.findOne({ where: { id: inscription.electiveId } });
+        
+        if (elective) {
+            elective.quotas += 1;
+            await electiveRepository.save(elective);
+        }
+    }
+
     await inscriptionRepository.remove(inscription);
     return true;
 }
@@ -50,10 +60,27 @@ export async function updateStatusService(id, data){
 
     if (!inscription) throw new Error("Inscripción no encontrada");
 
+    const Status = inscription.estado;
     inscription.estado = data.estado;
     inscription.reviewedAt = new Date();
 
     if (data.estado === "rechazado") inscription.motivo_rechazo = data.motivo_rechazo;
+
+    const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
+    const elective = await electiveRepository.findOne({ where: { id: inscription.electiveId } });
+    
+    if (elective) {
+        if (Status !== "aprobado" && data.estado === "aprobado") {
+            if (elective.quotas > 0) {
+                elective.quotas -= 1;
+                await electiveRepository.save(elective);
+            }
+        }
+        else if (Status === "aprobado" && data.estado === "rechazado") {
+            elective.quotas += 1;
+            await electiveRepository.save(elective);
+        }
+    }
 
     return await inscriptionRepository.save(inscription);
 }

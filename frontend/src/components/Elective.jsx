@@ -1,8 +1,9 @@
 import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
 import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle} from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createInscription } from "@services/inscription.service";
+import { getElectiveById } from "@services/elective.service";
 import Swal from "sweetalert2";
 
 export function Elective({
@@ -13,6 +14,9 @@ export function Elective({
 }) {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  
+  const [Elective, setElective] = useState(elective);
+  const refreshIntervalMs = 5000; // Actualizar cupos cada 5 segundos
 
   const isAlumno = user.role === "alumno";
   const isDocente = user.role === "docente";
@@ -20,6 +24,31 @@ export function Elective({
 
   // Verificar si el docente es dueño del electivo
   const isOwner = isDocente && elective.teacherRut === user.rut;
+
+  useEffect(() => {
+    let refresh = true;
+    
+    setElective(elective);
+
+    const fetchData = async () => {
+      try {
+        if (!elective?.id) return;
+        const res = await getElectiveById(elective.id);
+        if (res?.success && refresh) {
+          setElective(res.data);
+        }
+      } catch (error) {
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, refreshIntervalMs);
+
+    return () => {
+      refresh = false;
+      clearInterval(interval);
+    };
+  }, [elective?.id]);
 
   const getBadgeType = () => {
     if (elective.status === "Pendiente") {
@@ -42,7 +71,7 @@ export function Elective({
   };
 
   const getAvailabilityBadge = () => {
-    const availableQuotas = elective.quotas;
+    const availableQuotas = Elective?.quotas ?? 0;
 
     if (availableQuotas > 0) {
       return { text: "Disponible", color: "bg-green-100 text-green-700" };
@@ -114,16 +143,16 @@ export function Elective({
   const cardAlumno = () => {
 
     const availability = getAvailabilityBadge();
-    const hasQuotas = elective.quotas > 0;
+    const hasQuotas = (Elective?.quotas ?? 0) > 0;
 
     return (
       <div className="border border-gray-300 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-gray-400 bg-white">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex flex-row justify-between items-start mb-3">
             <h3 className="font-bold text-x1 text-gray-900 flex-1 pr-4">
-              {elective.name}
+              {Elective?.name}
             </h3>
-            <span className={'px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap ${availability.color}'}> {availability.text} </span>
+            <span className={`px-3 py-1 rounded-md text-xs font-semibold whitespace-nowrap ${availability.color}`}>{availability.text}</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
@@ -133,7 +162,7 @@ export function Elective({
 
           <div className="flex items-center gap-1.5 text-sm text-gray-600">
             <Clock className="h-4 w-4" />
-            <span>{elective.schedule}</span>
+            <span>{Elective?.schedule}</span>
           </div>
         </div>
 
@@ -141,7 +170,7 @@ export function Elective({
           <div className="flex items-center gap-2 text-sm mb-3">
             <Users className="h-4 w-4 text-blue-600" />
             <span className="text-gray-700">
-              <span className="font-semibold text-blue-600">{elective.quotas}</span> de {elective.quotas} cupos disponibles
+              <span className="font-semibold text-blue-600">{Elective?.quotas ?? 0}</span> cupos disponibles
             </span>
           </div>
 
@@ -150,8 +179,8 @@ export function Elective({
             <div className="flex-1">
               <span className="font-medium text-gray-700">Pre-requisitos:</span>
               <div className="flex flex-wrap gap-2 mt-1.5">
-                {elective.prerrequisites && elective.prerrequisites.trim() !== "" ? (
-                  elective.prerrequisites.split(',').map((prereq, index) => (
+                {Elective?.prerrequisites && Elective.prerrequisites.trim() !== "" ? (
+                  Elective.prerrequisites.split(',').map((prereq, index) => (
                     <span
                       key={index}
                       className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded border border-gray-300"
@@ -196,33 +225,33 @@ export function Elective({
     return (
       <tr className="border-b border-gray-200 last:border-0 transition-all hover:bg-gray-50">
         <td className="px-4 py-3 align-middle">
-          <span className="font-medium text-sm">{elective.name}</span>
+          <span className="font-medium text-sm">{Elective?.name}</span>
         </td>
 
         <td className="px-4 py-3 align-middle">
           <span className="text-sm text-gray-700 line-clamp-2">
-            {elective.description}
+            {Elective?.description}
           </span>
         </td>
 
         <td className="px-4 py-3 align-middle">
           <span className="text-sm text-gray-700 line-clamp-2">
-            {elective.objectives}
+            {Elective?.objectives}
           </span>
         </td>
 
         <td className="px-4 py-3 align-middle">
           <span className="text-sm text-gray-700 line-clamp-2">
-            {elective.prerrequisites || "Ninguno"}
+            {Elective?.prerrequisites || "Ninguno"}
           </span>
         </td>
 
         <td className="px-4 py-3 align-middle">
-          <span className="text-sm text-gray-700">{elective.schedule}</span>
+          <span className="text-sm text-gray-700">{Elective?.schedule}</span>
         </td>
 
         <td className="px-4 py-3 align-middle text-center">
-          <span className="text-sm font-medium">{elective.quotas}</span>
+          <span className="text-sm font-medium">{Elective?.quotas ?? 0}</span>
         </td>
 
         <td className="px-4 py-3 align-middle">
