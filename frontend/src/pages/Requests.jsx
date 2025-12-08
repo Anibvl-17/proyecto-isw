@@ -1,4 +1,5 @@
 import { getRequests, createRequest } from "@services/request.service";
+import { getElectives } from "@services/elective.service";
 import { showErrorAlert } from "@helpers/sweetAlert";
 import { useAuth } from "@context/AuthContext";
 import { Sidebar } from "@components/Sidebar";
@@ -133,7 +134,7 @@ const Requests = () => {
           <div className="flex flex-row flex-1 gap-4 justify-start items-center">
             {loading && <Badge text="Cargando" />}
 
-            {requests.length === 0 && (
+            {isAlumno && requests.length === 0 && (
               <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
                 Haz click en el botón
                 <span className="text-gray-600 border border-dashed border-gray-400 font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg">
@@ -141,6 +142,12 @@ const Requests = () => {
                   Nueva Solicitud
                 </span>
                 para crear una solicitud de inscripción
+              </p>
+            )}
+
+            {!isAlumno && requests.length === 0 && (
+              <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
+                <CheckCircle /> No hay solicitudes por revisar
               </p>
             )}
 
@@ -263,12 +270,7 @@ const Requests = () => {
                 </div>
               </div>
             </div>
-          )) ||
-            (requests.length === 0 && (
-              <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
-                <CheckCircle className="h-5 w-5" /> No hay solicitudes por revisar
-              </p>
-            ))}
+          ))}
         </div>
       </div>
     </div>
@@ -276,6 +278,27 @@ const Requests = () => {
 };
 
 async function createRequestDialog() {
+  const result = await getElectives();
+
+  if (!result.success) {
+    console.error("Error en Requests => createRequestDialog(): No se pudo obtener electivos");
+    showErrorAlert("Error", "Ocurrió un error al obtener electivos");
+  }
+
+  if (result.success && result.data?.length == 0) {
+    Swal.fire({
+      icon: "info",
+      text: "No hay electivos disponibles.",
+      confirmButtonText: "Volver",
+      confirmButtonColor: "oklch(48.8% 0.243 264.376)",
+      timer: 5000,
+      timerProgressBar: true
+    });
+
+    return;
+  }
+
+  const electives = result.data;
   const { value: formValues } = await Swal.fire({
     html:
       '<div class="text-start">' +
@@ -286,9 +309,9 @@ async function createRequestDialog() {
       '<div class="flex flex-col gap-0.5">' +
       '<label for="elective" class="text-sm font-medium">Electivo a Inscribir</label>' +
       '<select id="elective" class="border border-gray-300 px-2 py-1 text-sm rounded-md outline-0 transition-all hover:shadow-sm focus:border-blue-700">' +
-      '<option value="1" selected>PL/SQL</option>' +
-      '<option value="2">Machine Learning</option>' +
-      '<option value="3">Ciberseguridad</option>' +
+      (electives.map((elective) => 
+        '<option value="' + elective.id + '" selected>' + elective.name + '</option>'
+      ))+
       "</select>" +
       "</div>" +
       // Input Descripción
