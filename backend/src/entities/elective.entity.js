@@ -33,9 +33,16 @@ export const ElectiveEntity = new EntitySchema({
             type: "text",
             nullable: true,
         },
-        schedule: {
-            type: "varchar",
-            length: 255,
+        startTime: {
+            type: "time",
+            nullable: false,
+        },
+        endTime: {
+            type: "time",
+            nullable: false,
+        },
+        weekDays: {
+            type: "simple-json",
             nullable: false,
         },
         quotas: {
