@@ -100,7 +100,7 @@ export async function updateElective(req, res) {
         const { id } = req.params;
 
         const updateSchema = electiveBodyValidation.fork(
-            ["name", "description", "objectives", "prerrequisites", "schedule", "quotas"],
+            ["name", "description", "objectives", "prerrequisites", "startTime", "endTime", "weekDays", "quotas"],
             (schema) => schema.optional()
         );
 

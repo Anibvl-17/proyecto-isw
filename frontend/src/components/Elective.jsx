@@ -1,6 +1,6 @@
 import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
-import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle} from "lucide-react";
+import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createInscription } from "@services/inscription.service";
 import { getElectiveById } from "@services/elective.service";
@@ -14,7 +14,7 @@ export function Elective({
 }) {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  
+
   const [Elective, setElective] = useState(elective);
   const refreshIntervalMs = 5000; // Actualizar cupos cada 5 segundos
 
@@ -27,7 +27,7 @@ export function Elective({
 
   useEffect(() => {
     let refresh = true;
-    
+
     setElective(elective);
 
     const fetchData = async () => {
@@ -70,6 +70,50 @@ export function Elective({
     }
   };
 
+  const formatSchedule = () => {
+    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
+      return "No especificado";
+    }
+
+    const days = Array.isArray(elective.weekDays)
+      ? elective.weekDays.join(", ")
+      : elective.weekDays;
+
+    return `${elective.startTime.substring(0, 5)} - ${elective.endTime.substring(0, 5)} (${days})`;
+  };
+
+  const formatScheduleTable = () => {
+    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
+      return <span className="text-gray-500 text-xs italic">No especificado</span>;
+    }
+
+    const dayAbbrevs = {
+      Lunes: "Lu",
+      Martes: "Ma",
+      Miércoles: "Mi",
+      Jueves: "Ju",
+      Viernes: "Vi",
+      Sábado: "Sáb",
+    };
+
+    const daysArray = Array.isArray(elective.weekDays)
+      ? elective.weekDays
+      : [elective.weekDays];
+
+    const daysShort = daysArray
+      .map((day) => dayAbbrevs[day] || day)
+      .join(" - ");
+
+    return (
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="font-semibold text-gray-900 text-sm">
+          {elective.startTime} - {elective.endTime}
+        </span>
+        <span className="text-xs text-gray-600">{daysShort}</span>
+      </div>
+    );
+  };
+
   const getAvailabilityBadge = () => {
     const availableQuotas = Elective?.quotas ?? 0;
 
@@ -96,7 +140,7 @@ export function Elective({
       showCancelButton: true,
       confirmButtonText: "Sí, inscribirme",
       cancelButtonText: "Cancelar",
-      confirmButtonColor: "oklch(52.7% 0.154 150.069)", 
+      confirmButtonColor: "oklch(52.7% 0.154 150.069)",
     });
 
     if (!confirm.isConfirmed) return;
@@ -112,7 +156,7 @@ export function Elective({
           timer: 3000,
           showConfirmButton: false
         });
-        
+
         if (onEdit) onEdit();
       } else {
         Swal.fire({
@@ -157,12 +201,12 @@ export function Elective({
 
           <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
             <Calendar className="h-4 w-4" />
-            <span>2025-1</span>
+            <span>2025-2</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-sm text-gray-600">
             <Clock className="h-4 w-4" />
-            <span>{Elective?.schedule}</span>
+            <span>{formatSchedule()}</span>
           </div>
         </div>
 
@@ -206,16 +250,16 @@ export function Elective({
           </button>
 
           <button
-                onClick={handleInscription}
-                disabled={!hasQuotas}
-                className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 
-                    ${hasQuotas 
-                        ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md' 
-                        : 'bg-gray-400 cursor-not-allowed'}`}
-            >
-                <PlusCircle className="h-4 w-4" />
-                {hasQuotas ? "Inscribirse" : "Sin cupos"}
-            </button>
+            onClick={handleInscription}
+            disabled={!hasQuotas}
+            className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 
+                    ${hasQuotas
+                ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md'
+                : 'bg-gray-400 cursor-not-allowed'}`}
+          >
+            <PlusCircle className="h-4 w-4" />
+            {hasQuotas ? "Inscribirse" : "Sin cupos"}
+          </button>
         </div>
       </div>
     );
@@ -235,23 +279,11 @@ export function Elective({
         </td>
 
         <td className="px-4 py-3 align-middle">
-          <span className="text-sm text-gray-700 line-clamp-2">
-            {Elective?.objectives}
-          </span>
-        </td>
-
-        <td className="px-4 py-3 align-middle">
-          <span className="text-sm text-gray-700 line-clamp-2">
-            {Elective?.prerrequisites || "Ninguno"}
-          </span>
-        </td>
-
-        <td className="px-4 py-3 align-middle">
-          <span className="text-sm text-gray-700">{Elective?.schedule}</span>
+            {formatScheduleTable()}
         </td>
 
         <td className="px-4 py-3 align-middle text-center">
-          <span className="text-sm font-medium">{Elective?.quotas ?? 0}</span>
+          <span className="text-sm font-medium">{Elective?.quotas}</span>
         </td>
 
         <td className="px-4 py-3 align-middle">
@@ -307,7 +339,7 @@ export function Elective({
     if (isAlumno) return <p className="text-gray-500 text-sm">Cargando...</p>;
     return (
       <tr>
-        <td colSpan="6" className="text-center py-4 text-gray-500 text-sm">
+        <td colSpan="7" className="text-center py-4 text-gray-500 text-sm">
           Cargando...
         </td>
       </tr>
@@ -323,97 +355,93 @@ export function Elective({
   return null;
 }
 
-async function electiveDetailsDialog(elective, isAlumno, isJefeCarrera) {
+async function electiveDetailsDialog(elective) {
+
+  const formatSchedule = () => {
+    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
+      return "No especificado";
+    }
+    const days = Array.isArray(elective.weekDays)
+      ? elective.weekDays.join(", ")
+      : elective.weekDays;
+    return `${elective.startTime.substring(0, 5)} - ${elective.endTime.substring(0, 5)} (${days})`;
+  };
+
   await Swal.fire({
     html:
       '<div class="text-start">' +
-      '<p class="font-semibold text-xl mb-1 text-black">Detalles del Electivo</p>' +
-
-      (!isAlumno
-        ? '<p class="text-sm text-gray-600 mb-4">' +
-          "Creado el " + dateFormatter(elective.createdAt) +
-          "</p>"
-        : '<div class="mb-4"></div>') +
-      
-      '<div class="flex flex-col gap-3">' +
-      '<div class="bg-blue-50 border border-blue-200 rounded-md p-3">' +
-      '<p class="font-bold text-sm text-gray-800 mb-2">Información General</p>' +
-      '<div class="flex flex-col gap-2">' +
-      '<p class="text-sm text-gray-800">' +
-      '<span class="text-gray-600">Nombre: </span>' +
-      '<span class="font-semibold">' +
+      '<div class="mb-4">' +
+      '<p class="font-bold text-2xl text-gray-900 mb-1">' +
       elective.name +
-      "</span>" +
       "</p>" +
-
-      (!isAlumno
-        ? '<p class="text-sm text-gray-800">' +
-          '<span class="text-gray-600">Estado: </span>' +
-          '<span class="font-semibold">' +
-          elective.status +
-          "</span>" +
-          "</p>" 
-        : "") +
-
-      '<p class="text-sm text-gray-800">' +
-      '<span class="text-gray-600">Horario: </span>' +
-      '<span class="font-semibold">' +
-      elective.schedule +
-      "</span>" +
+      "</div>" +
+      '<div class="flex flex-col gap-4">' +
+      '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">' +
+      '<p class="font-bold text-sm text-gray-900 mb-3">Información General</p>' +
+      '<div class="grid grid-cols-2 gap-3">' +
+      '<div class="col-span-2">' +
+      '<p class="text-xs text-gray-600 mb-0.5">Nombre del electivo</p>' +
+      '<p class="text-sm font-semibold text-gray-900">' +
+      elective.name +
       "</p>" +
-      '<p class="text-sm text-gray-800">' +
-      '<span class="text-gray-600">Cupos: </span>' +
-      '<span class="font-semibold">' +
+      "</div>" +
+      "<div>" +
+      '<p class="text-xs text-gray-600 mb-0.5">Periodo</p>' +
+      '<p class="text-sm font-semibold text-gray-900">2025-2</p>' +
+      "</div>" +
+      '<div class="col-span-2">' +
+      '<p class="text-xs text-gray-600 mb-0.5">Horario</p>' +
+      '<p class="text-sm font-semibold text-gray-900">' +
+      formatSchedule() +
+      "</p>" +
+      "</div>" +
+      "<div>" +
+      '<p class="text-xs text-gray-600 mb-0.5">Cupos disponibles</p>' +
+      '<p class="text-sm font-semibold text-blue-600">' +
       elective.quotas +
-      "</span>" +
       "</p>" +
       "</div>" +
       "</div>" +
-      '<div>' +
-      '<p class="font-bold text-sm text-gray-800 mb-2">Descripción</p>' +
-      '<div class="p-3 text-sm text-gray-800 border bg-gray-50 border-gray-200 rounded-md">' +
+      "</div>" +
+      "<div>" +
+      '<p class="font-bold text-sm text-gray-900 mb-2">Descripción</p>' +
+      '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg leading-relaxed">' +
       elective.description +
       "</div>" +
       "</div>" +
-      '<div>' +
-      '<p class="font-bold text-sm text-gray-800 mb-2">Objetivos</p>' +
-      '<div class="p-3 text-sm text-gray-800 border bg-gray-50 border-gray-200 rounded-md">' +
-      (elective.objectives || "No especificados") +
+      "<div>" +
+      '<p class="font-bold text-sm text-gray-900 mb-2">Objetivos del Electivo</p>' +
+      '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg leading-relaxed">' +
+      (elective.objectives || '<span class="italic text-gray-500">No especificados</span>') +
       "</div>" +
       "</div>" +
-      '<div>' +
-      '<p class="font-bold text-sm text-gray-800 mb-2">Prerrequisitos</p>' +
-      '<div class="p-3 text-sm text-gray-800 border bg-gray-50 border-gray-200 rounded-md">' +
-      (elective.prerrequisites || "Ninguno") +
-      "</div>" +
-      "</div>" +
-      (isJefeCarrera
-        ? '<div class="bg-purple-50 border border-purple-200 rounded-md p-3">' +
-        '<p class="font-bold text-sm text-gray-800 mb-2">Docente Responsable</p>' +
-        '<p class="text-sm text-gray-800">' +
-        '<span class="text-gray-600">RUT: </span>' +
-        '<span class="font-semibold">' +
-        elective.teacherRut +
-        "</span>" +
-        "</p>" +
+      "<div>" +
+      '<p class="font-bold text-sm text-gray-900 mb-2">Prerrequisitos</p>' +
+      '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg">' +
+      (elective.prerequisites && elective.prerequisites.trim() !== ""
+        ? '<div class="flex flex-wrap gap-2">' +
+          elective.prerequisites
+            .split(",")
+            .map(
+              (prereq) =>
+                '<span class="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-medium">' +
+                prereq.trim() +
+                "</span>"
+          )
+          .join("") +
         "</div>"
-        : "") +
+        : '<span class="italic text-gray-500">Ninguno</span>') +
+      "</div>" +
+      "</div>" +
       "</div>" +
       "</div>",
+    width: "600px",
     confirmButtonText: "Cerrar",
-    confirmButtonColor: "oklch(48.8% 0.243 264.376)",
+    confirmButtonColor: "#7c3aed",
     showCloseButton: true,
-  });
-}
-
-// Formateador de fechas
-function dateFormatter(date) {
-  const dateObject = new Date(date);
-  return dateObject.toLocaleString("es-CL", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    customClass: {
+      popup: "rounded-xl",
+      confirmButton: "rounded-lg px-6 py-2.5",
+    },
   });
 }
