@@ -89,7 +89,7 @@ const Electives = () => {
             showErrorAlert("Error", "No se pudo eliminar el electivo");
         }
     };
-  
+
     const handleViewDetails = async (elective) => {
         const isPendiente = elective.status === "Pendiente";
 
@@ -108,15 +108,16 @@ const Electives = () => {
                         <p class="text-sm text-gray-500 font-semibold">Objetivos</p>
                         <p>${elective.objectives}</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm text-gray-500 font-semibold">Horario</p>
-                            <p>${elective.schedule}</p>
+                    <div>
+                        <p class="text-sm text-gray-500 font-semibold">Horario</p>
+                        <div class="text-sm space-y-1">
+                            <p><strong>Hora:</strong> ${elective.startTime ? elective.startTime.substring(0, 5) : 'N/A'} - ${elective.endTime ? elective.endTime.substring(0, 5) : 'N/A'}</p>
+                            <p><strong>Días:</strong> ${elective.weekDays ? elective.weekDays.join(', ') : 'N/A'}</p>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500 font-semibold">Cupos</p>
-                            <p>${elective.quotas}</p>
-                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 font-semibold">Cupos</p>
+                        <p>${elective.quotas}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500 font-semibold">Prerrequisitos</p>
@@ -147,8 +148,8 @@ const Electives = () => {
         const action = status === "Aprobado" ? "aprobado" : "rechazado";
         const confirm = await Swal.fire({
             title: `¿${action} electivo?`,
-            text: status === "Aprobado" 
-                ? "El electivo será visible para los alumnos." 
+            text: status === "Aprobado"
+                ? "El electivo será visible para los alumnos."
                 : "El docente deberá editarlo para reenviarlo.",
             icon: "warning",
             showCancelButton: true,
@@ -181,7 +182,7 @@ const Electives = () => {
                 if (result.success) {
                     setElectives(result.data || []);
                     setIsFilterActive(true);
-                    
+
                     Swal.fire({
                         toast: true,
                         title: "Filtro aplicado: Sin requisitos",
@@ -225,10 +226,10 @@ const Electives = () => {
                         </div>
                         <div className="flex gap-3">
                             {(isAlumno || isJefeCarrera) && (
-                                <button 
+                                <button
                                     onClick={handleFilterToggle}
                                     className={`font-medium text-sm px-4 py-2 flex flex-row items-center gap-2 rounded-lg transition-all border
-                                        ${isFilterActive 
+                                        ${isFilterActive
                                             ? "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200"
                                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                         }`}
@@ -257,12 +258,12 @@ const Electives = () => {
                     {!loading && electives.length > 0 && isAlumno && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {electives.map((elective) => (
-                                <Elective 
-                                    key={elective.id} 
+                                <Elective
+                                    key={elective.id}
                                     elective={elective}
                                     onEdit={fetchElectives}
                                 />
-                            ))} 
+                            ))}
                         </div>
                     )}
                     {!loading && electives.length > 0 && (isDocente || isJefeCarrera) && (
@@ -272,39 +273,34 @@ const Electives = () => {
                                     <tr>
                                         <th className="min-w-32 h-12 px-4 text-left font-medium">Nombre</th>
                                         <th className="min-w-40 h-12 px-4 text-left font-medium">Descripción</th>
-                                        <th className="min-w-40 h-12 px-4 text-left font-medium">Objetivos</th>
-                                        <th className="min-w-40 h-12 px-4 text-left font-medium">Prerrequisitos</th>
-                                        <th className="min-w-32 h-12 px-4 text-left font-medium">Horario</th>
+                                        <th className="min-w-32 h-12 px-4 text-center font-medium">Horario</th>
                                         <th className="min-w-20 h-12 px-4 text-center font-medium">Cupos</th>
-                                        {(isJefeCarrera || isDocente) && (
-                                            <th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>
-                                        )}
+                                        <th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>
                                         {isDocente && (
                                             <th className="min-w-24 h-12 px-4 text-center font-medium">Acciones</th>
                                         )}
-                                        {isJefeCarrera && (
-                                            <th className="min-w-28 h-12 px-4 text-center font-medium">Detalles</th>
-                                        )}
-                                    </tr>
+                                     </tr>
                                 </thead>
                                 <tbody>
                                     {electives.map((elective) => (
                                         <tr key={elective.id}>
                                             <td className="px-4 py-3">{elective.name}</td>
                                             <td className="px-4 py-3 text-gray-600 text-xs">{elective.description}</td>
-                                            <td className="px-4 py-3 text-gray-600 text-xs">{elective.objectives}</td>
-                                            <td className="px-4 py-3 text-gray-600 text-xs">{elective.prerrequisites || "-"}</td>
-                                            <td className="px-4 py-3">{elective.schedule}</td>
+                                            <td className="px-4 py-3 text-gray-600 text-xs text-center">
+                                                <div className="flex flex-col gap-1">
+                                                    <p className="font-semibold text-gray-700">{elective.startTime?.substring(0, 5)} - {elective.endTime?.substring(0, 5)}</p>
+                                                    <p>{elective.weekDays ? elective.weekDays.join(' y ') : 'N/A'}</p>
+                                                </div>
+                                            </td>
                                             <td className="px-4 py-3 text-center font-medium">{elective.quotas}</td>
                                             {(isDocente || isJefeCarrera) && (
                                                 <td className="px-4 py-3 text-center">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                                        elective.status === "Aprobado"
-                                                            ? "bg-green-100 text-green-800"
-                                                            : elective.status === "Rechazado"
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${elective.status === "Aprobado"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : elective.status === "Rechazado"
                                                             ? "bg-red-100 text-red-800"
                                                             : "bg-yellow-100 text-yellow-800"
-                                                    }`}>
+                                                        }`}>
                                                         {elective.status}
                                                     </span>
                                                 </td>
@@ -342,8 +338,30 @@ const Electives = () => {
     );
 };
 
+function generateTimeOptions() {
+    const options = [];
+    for (let hour = 8; hour <= 23; hour++) {
+        for (let minute = 0; minute < 60; minute += 10) {
+            const time = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+            options.push(time);
+        }
+    }
+    return options;
+}
+
 async function electiveDialog(existingElective = null) {
     const isEdit = !!existingElective;
+    const timeOptions = generateTimeOptions();
+
+    const weekDays = [
+        { id: "Lunes", label: "Lunes" },
+        { id: "Martes", label: "Martes" },
+        { id: "Miércoles", label: "Miércoles" },
+        { id: "Jueves", label: "Jueves" },
+        { id: "Viernes", label: "Viernes" },
+        { id: "Sábado", label: "Sábado" },
+    ];
+
     const { value: formValues } = await Swal.fire({
         html:
             '<div class="text-start">' +
@@ -366,9 +384,47 @@ async function electiveDialog(existingElective = null) {
             '<label for="prerrequisites" class="text-sm font-medium">Prerrequisitos</label>' +
             `<textarea id="prerrequisites" class="border border-gray-300 px-2 py-1 text-sm rounded-md outline-0 transition-all hover:shadow-sm focus:border-blue-700">${existingElective?.prerrequisites || ""}</textarea>` +
             "</div>" +
-            '<div class="flex flex-col gap-0.5">' +
-            '<label for="schedule" class="text-sm font-medium">Horario</label>' +
-            `<input id="schedule" type="text" class="border border-gray-300 px-2 py-1 text-sm rounded-md outline-0 transition-all hover:shadow-sm focus:border-blue-700" value="${existingElective?.schedule || ""}" />` +
+            '<div class="grid grid-cols-2 gap-3">' +
+            '<div class="flex flex-col gap-1">' +
+            '<label for="startTime" class="text-sm font-semibold">Hora Inicio <span class="text-red-500">*</span></label>' +
+            '<select id="startTime" class="border border-gray-300 px-3 py-2 text-sm rounded-md outline-none focus:ring-2 focus:ring-blue-500 bg-white">' +
+            '<option value="">Seleccionar...</option>' +
+            timeOptions
+                .map(
+                    (time) =>
+                        `<option value="${time}" ${existingElective?.startTime === time ? "selected" : ""}>${time}</option>`
+                )
+                .join("") +
+            "</select>" +
+            "</div>" +
+            '<div class="flex flex-col gap-1">' +
+            '<label for="endTime" class="text-sm font-semibold">Hora Fin <span class="text-red-500">*</span></label>' +
+            '<select id="endTime" class="border border-gray-300 px-3 py-2 text-sm rounded-md outline-none focus:ring-2 focus:ring-blue-500 bg-white">' +
+            '<option value="">Seleccionar...</option>' +
+            timeOptions
+                .map(
+                    (time) =>
+                        `<option value="${time}" ${existingElective?.endTime === time ? "selected" : ""}>${time}</option>`
+                )
+                .join("") +
+            "</select>" +
+            "</div>" +
+            "</div>" +
+            '<div class="flex flex-col gap-2">' +
+            '<label class="text-sm font-semibold">Días de la semana <span class="text-red-500">*</span></label>' +
+            '<div class="grid grid-cols-3 gap-2">' +
+            weekDays
+                .map(
+                    (day) =>
+                        `<label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">` +
+                        `<input type="checkbox" id="day-${day.id}" value="${day.id}" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" ${existingElective?.weekDays?.includes(day.id) ? "checked" : ""
+                        } />` +
+                        `<span class="text-sm text-gray-700 select-none">${day.label}</span>` +
+                        `</label>`
+                )
+                .join("") +
+            "</div>" +
+            '<span class="text-xs text-gray-500">Selecciona al menos un día</span>' +
             "</div>" +
             '<div class="flex flex-col gap-0.5">' +
             '<label for="quotas" class="text-sm font-medium">Cupos</label>' +
@@ -387,16 +443,59 @@ async function electiveDialog(existingElective = null) {
             const description = document.getElementById("description").value.trim();
             const objectives = document.getElementById("objectives").value.trim();
             const prerrequisites = document.getElementById("prerrequisites").value.trim();
-            const schedule = document.getElementById("schedule").value.trim();
+            const startTime = document.getElementById("startTime").value;
+            const endTime = document.getElementById("endTime").value;
             const quotas = parseInt(document.getElementById("quotas").value.trim(), 10);
 
-            if (!name) return Swal.showValidationMessage("El nombre es obligatorio");
-            if (!description) return Swal.showValidationMessage("La descripción es obligatoria");
-            if (!objectives) return Swal.showValidationMessage("Los objetivos son obligatorios");
-            if (!schedule) return Swal.showValidationMessage("El horario es obligatorio");
-            if (Number.isNaN(quotas) || quotas <= 0) return Swal.showValidationMessage("Los cupos deben ser un número mayor a 0");
+            const weekDays = Array.from(
+                document.querySelectorAll('input[type="checkbox"]:checked')
+            ).map((checkbox) => checkbox.value);
 
-            return { name, description, objectives, prerrequisites, schedule, quotas };
+            if (!name || name.length < 3) {
+                return Swal.showValidationMessage("El nombre debe tener al menos 3 caracteres");
+            }
+            if (!description || description.length < 10) {
+                return Swal.showValidationMessage("La descripción debe tener al menos 10 caracteres");
+            }
+            if (!objectives || objectives.length < 10) {
+                return Swal.showValidationMessage("Los objetivos deben tener al menos 10 caracteres");
+            }
+            if (!startTime) {
+                return Swal.showValidationMessage("Debe seleccionar una hora de inicio");
+            }
+            if (!endTime) {
+                return Swal.showValidationMessage("Debe seleccionar una hora de fin");
+            }
+            if (weekDays.length === 0) {
+                return Swal.showValidationMessage("Debe seleccionar al menos un día de la semana");
+            }
+            if (Number.isNaN(quotas) || quotas < 1 || quotas > 200) {
+                return Swal.showValidationMessage("Los cupos deben estar entre 1 y 200");
+            }
+
+            const [startHour, startMin] = startTime.split(":").map(Number);
+            const [endHour, endMin] = endTime.split(":").map(Number);
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+
+            if (endMinutes <= startMinutes) {
+                return Swal.showValidationMessage("La hora de fin debe ser posterior a la hora de inicio");
+            }
+            if (endMinutes - startMinutes < 30) {
+                return Swal.showValidationMessage("La clase debe durar al menos 30 minutos");
+            }
+
+
+            return {
+                name,
+                description,
+                objectives,
+                prerrequisites: prerrequisites || null,
+                startTime,
+                endTime,
+                weekDays,
+                quotas,
+            };
         },
     });
     return formValues || null;
