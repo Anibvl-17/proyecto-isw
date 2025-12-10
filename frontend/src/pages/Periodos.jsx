@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
-import { Edit2, Trash2, CalendarPlus, Eye, EyeOff } from "lucide-react";
+import { Edit2, Trash2, CalendarPlus, Eye, EyeOff, Users, GraduationCap, User } from "lucide-react";
 import { getPeriodos, createPeriodo, updatePeriodo, deletePeriodo } from "@services/periodo.service";
 import { showErrorAlert, showSuccessAlert } from "@helpers/sweetAlert";
 import Swal from "sweetalert2";
@@ -68,9 +68,14 @@ const Periodos = () => {
             <label class="text-sm font-medium">Restricción Año (Opcional)</label>
             <input type="number" id="restriccionAño" class="swal2-input m-0" placeholder="Ej: 4" value="${periodoToEdit?.restriccionAño || ''}">
           </div>
-          <div class="flex items-center gap-2 mt-2">
-            <input type="checkbox" id="visible" ${periodoToEdit?.visible ? 'checked' : ''}>
-            <label for="visible" class="text-sm font-medium">Visible para alumnos</label>
+          <div>
+            <label class="text-sm font-medium">Visibilidad</label>
+            <select id="visibilidad" class="swal2-select m-0">
+              <option value="oculto" ${periodoToEdit?.visibilidad === 'oculto' || !periodoToEdit ? 'selected' : ''}>Oculto (nadie)</option>
+              <option value="alumnos" ${periodoToEdit?.visibilidad === 'alumnos' ? 'selected' : ''}>Solo Alumnos</option>
+              <option value="docentes" ${periodoToEdit?.visibilidad === 'docentes' ? 'selected' : ''}>Solo Docentes</option>
+              <option value="todos" ${periodoToEdit?.visibilidad === 'todos' ? 'selected' : ''}>Todos</option>
+            </select>
           </div>
         </div>
       `,
@@ -83,7 +88,7 @@ const Periodos = () => {
         const fechaInicio = document.getElementById("fechaInicio").value;
         const fechaCierre = document.getElementById("fechaCierre").value;
         const restriccionAño = document.getElementById("restriccionAño").value;
-        const visible = document.getElementById("visible").checked;
+        const visibilidad = document.getElementById("visibilidad").value;
 
         if (!nombre || !fechaInicio || !fechaCierre) {
           Swal.showValidationMessage("Completa los campos obligatorios");
@@ -98,9 +103,8 @@ const Periodos = () => {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionCarreras: null,
           restriccionAño: restriccionAño ? parseInt(restriccionAño) : null,
-          visible,
+          visibilidad,
         };
       },
     });
@@ -109,7 +113,7 @@ const Periodos = () => {
       try {
         if (isEdit) {
           await updatePeriodo(periodoToEdit.id, formValues);
-          showSuccessAlert("¡Actualizado!", "El periodo ha sido modificado.");
+          showSuccessAlert("¡Actualizado!", "Periodo modificado.");
         } else {
           await createPeriodo(formValues);
           showSuccessAlert("¡Creado!", "Periodo creado exitosamente.");
@@ -144,6 +148,19 @@ const Periodos = () => {
     }
   };
 
+  const renderVisibilidadBadge = (visibilidad) => {
+    switch (visibilidad) {
+      case "todos":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
+      case "alumnos":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
+      case "docentes":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200"><User className="w-4 h-4" /> Docentes</span>;
+      default:
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full border border-gray-200"><EyeOff className="w-4 h-4" /> Oculto</span>;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -173,7 +190,7 @@ const Periodos = () => {
                   <th className="h-12 px-4 text-left font-medium">Nombre</th>
                   <th className="h-12 px-4 text-left font-medium">Inicio</th>
                   <th className="h-12 px-4 text-left font-medium">Cierre</th>
-                  <th className="h-12 px-4 text-left font-medium">Estado</th>
+                  <th className="h-12 px-4 text-left font-medium">Visibilidad</th>
                   <th className="h-12 px-4 text-center font-medium">Acciones</th>
                 </tr>
               </thead>
@@ -195,18 +212,7 @@ const Periodos = () => {
                       <td className="p-4 font-medium">{periodo.nombre}</td>
                       <td className="p-4">{dateFormatter(periodo.fechaInicio)}</td>
                       <td className="p-4">{dateFormatter(periodo.fechaCierre)}</td>
-
-                      <td className="p-4">
-                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border w-fit ${
-                          periodo.visible 
-                            ? "bg-green-50 text-green-700 border-green-200" 
-                            : "bg-red-50 text-red-700 border-red-200"
-                        }`}>
-                          {periodo.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                          {periodo.visible ? "Visible" : "Oculto"}
-                        </div>
-                      </td>
-
+                      <td className="p-4">{renderVisibilidadBadge(periodo.visibilidad)}</td>
                       <td className="p-4 flex justify-center gap-2">
                         <button
                           onClick={() => handlePeriodoDialog(periodo)}
@@ -214,7 +220,6 @@ const Periodos = () => {
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
-
                         <button
                           onClick={() => handleDelete(periodo.id)}
                           className="p-2 hover:bg-gray-200 rounded-full text-red-600"
