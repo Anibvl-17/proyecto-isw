@@ -7,10 +7,18 @@ import { createInscriptionBodyValidation, updateStatusValidation } from "../vali
 import { createInscriptionService, getInscriptionService, getInscriptionIdService, deleteInscriptionIdService, updateStatusService, hasInscriptionToElectiveService, getElectivesByPrerequisitesService } from "../services/inscription.service.js";
 import { getElectivesService } from "../services/elective.service.js";
 import jwt from "jsonwebtoken";
+// 1. IMPORTAMOS LA VALIDACIÓN DEL PERIODO
+import { checkInscriptionPeriod } from "../services/periodo.service.js";
 
-export async function createInscription(req, res){//Ver bien como implementar que e jefe de carrera peda inscribir a un alumno a electivo ya que se puede dar el alumno caso de que no pueda 
-                                                    //Inscribirse porque estan los cupos llenos entonces el jede de carrera podria hacerlo
+export async function createInscription(req, res){
     try {
+        // 2. VALIDACIÓN NUEVA: Verificar si hay periodo activo para alumnos
+        // Si no hay periodo, bloqueamos la inscripción con error 403
+        const isPeriodActive = await checkInscriptionPeriod();
+        if (!isPeriodActive) {
+            return handleErrorClient(res, 403, "El proceso de inscripción no está disponible para alumnos en este momento.");
+        }
+
         const authHeader = req.headers["authorization"];
         if (!authHeader) return handleErrorClient(res, 401, "No autorizado", "No se proporcionó token");
 
@@ -81,6 +89,14 @@ export async function getInscriptionId(req, res){
 export async function deleteInscriptionId(req, res){
     try {
         const { id } = req.params;
+
+        // 3. VALIDACIÓN NUEVA: Verificar periodo al eliminar
+        // Si el periodo cerró, el alumno no puede borrar su inscripción
+        const isPeriodActive = await checkInscriptionPeriod();
+        if (!isPeriodActive) {
+            return handleErrorClient(res, 403, "El periodo ha cerrado. No puedes anular inscripciones.");
+        }
+
         const inscription = await deleteInscriptionIdService(id);
 
         if(!inscription) return handleErrorClient(res, 404, "Inscripción no encontrada");
