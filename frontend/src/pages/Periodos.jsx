@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
-import { Edit2, Trash2, CalendarPlus } from "lucide-react"; // ← FIX: se eliminó CalendarRange
+import { Edit2, Trash2, CalendarPlus, Eye, EyeOff, Users, GraduationCap, User } from "lucide-react";
 import { getPeriodos, createPeriodo, updatePeriodo, deletePeriodo } from "@services/periodo.service";
 import { showErrorAlert, showSuccessAlert } from "@helpers/sweetAlert";
 import Swal from "sweetalert2";
@@ -14,9 +14,10 @@ const Periodos = () => {
     try {
       setLoading(true);
       const data = await getPeriodos();
-      setPeriodos(data);
+      setPeriodos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error al obtener periodos", error);
+      setPeriodos([]);
     } finally {
       setLoading(false);
     }
@@ -37,11 +38,9 @@ const Periodos = () => {
     });
   };
 
-  // Crear o Editar periodo
   const handlePeriodoDialog = async (periodoToEdit = null) => {
     const isEdit = !!periodoToEdit;
 
-    // Formatear datetime-local
     const formatForInput = (dateStr) => {
       if (!dateStr) return "";
       const date = new Date(dateStr);
@@ -65,27 +64,18 @@ const Periodos = () => {
             <label class="text-sm font-medium">Fecha Cierre</label>
             <input type="datetime-local" id="fechaCierre" class="swal2-input m-0" value="${formatForInput(periodoToEdit?.fechaCierre)}">
           </div>
-
-          <div>
-            <label class="text-sm font-medium">Restricción Carreras</label>
-            <div class="flex gap-4 mt-2">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" id="check_icinf" ${periodoToEdit?.restriccionCarreras?.includes('ICINF') ? 'checked' : ''}> ICINF
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" id="check_ieci" ${periodoToEdit?.restriccionCarreras?.includes('IECI') ? 'checked' : ''}> IECI
-                </label>
-            </div>
-          </div>
-
           <div>
             <label class="text-sm font-medium">Restricción Año (Opcional)</label>
             <input type="number" id="restriccionAño" class="swal2-input m-0" placeholder="Ej: 4" value="${periodoToEdit?.restriccionAño || ''}">
           </div>
-
-          <div class="flex items-center gap-2 mt-2">
-            <input type="checkbox" id="visible" ${periodoToEdit?.visible ? 'checked' : ''}>
-            <label for="visible" class="text-sm font-medium">Visible para alumnos</label>
+          <div>
+            <label class="text-sm font-medium">Visibilidad</label>
+            <select id="visibilidad" class="swal2-select m-0">
+              <option value="oculto" ${periodoToEdit?.visibilidad === 'oculto' || !periodoToEdit ? 'selected' : ''}>Oculto (nadie)</option>
+              <option value="alumnos" ${periodoToEdit?.visibilidad === 'alumnos' ? 'selected' : ''}>Solo Alumnos</option>
+              <option value="docentes" ${periodoToEdit?.visibilidad === 'docentes' ? 'selected' : ''}>Solo Docentes</option>
+              <option value="todos" ${periodoToEdit?.visibilidad === 'todos' ? 'selected' : ''}>Todos</option>
+            </select>
           </div>
         </div>
       `,
@@ -93,37 +83,28 @@ const Periodos = () => {
       showCancelButton: true,
       confirmButtonText: isEdit ? "Guardar Cambios" : "Crear",
       cancelButtonText: "Cancelar",
-
       preConfirm: () => {
-        const nombre = document.getElementById("nombre").value;
+        const nombre = document.getElementById("nombre").value.trim();
         const fechaInicio = document.getElementById("fechaInicio").value;
         const fechaCierre = document.getElementById("fechaCierre").value;
-        const icinf = document.getElementById("check_icinf").checked;
-        const ieci = document.getElementById("check_ieci").checked;
         const restriccionAño = document.getElementById("restriccionAño").value;
-        const visible = document.getElementById("visible").checked;
+        const visibilidad = document.getElementById("visibilidad").value;
 
         if (!nombre || !fechaInicio || !fechaCierre) {
-          Swal.showValidationMessage("Por favor completa los campos obligatorios");
+          Swal.showValidationMessage("Completa los campos obligatorios");
           return false;
         }
-
         if (new Date(fechaCierre) <= new Date(fechaInicio)) {
           Swal.showValidationMessage("La fecha de cierre debe ser posterior a la de inicio");
           return false;
         }
 
-        const carreras = [];
-        if (icinf) carreras.push("ICINF");
-        if (ieci) carreras.push("IECI");
-
         return {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionCarreras: carreras.length > 0 ? carreras : null,
           restriccionAño: restriccionAño ? parseInt(restriccionAño) : null,
-          visible,
+          visibilidad,
         };
       },
     });
@@ -132,15 +113,14 @@ const Periodos = () => {
       try {
         if (isEdit) {
           await updatePeriodo(periodoToEdit.id, formValues);
-          showSuccessAlert("¡Actualizado!", "El periodo ha sido modificado.");
+          showSuccessAlert("¡Actualizado!", "Periodo modificado.");
         } else {
           await createPeriodo(formValues);
-          showSuccessAlert("¡Creado!", "El periodo ha sido creado exitosamente.");
+          showSuccessAlert("¡Creado!", "Periodo creado exitosamente.");
         }
         fetchPeriodos();
       } catch (error) {
-        console.error(error);
-        showErrorAlert("Error", "Hubo un problema al guardar el periodo.");
+        showErrorAlert("Error", "No se pudo guardar el periodo.");
       }
     }
   };
@@ -160,11 +140,24 @@ const Periodos = () => {
     if (result.isConfirmed) {
       try {
         await deletePeriodo(id);
-        showSuccessAlert("Eliminado", "El periodo ha sido eliminado.");
+        showSuccessAlert("Eliminado", "Periodo eliminado correctamente.");
         fetchPeriodos();
       } catch (error) {
         showErrorAlert("Error", "No se pudo eliminar el periodo.");
       }
+    }
+  };
+
+  const renderVisibilidadBadge = (visibilidad) => {
+    switch (visibilidad) {
+      case "todos":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
+      case "alumnos":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
+      case "docentes":
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200"><User className="w-4 h-4" /> Docentes</span>;
+      default:
+        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full border border-gray-200"><EyeOff className="w-4 h-4" /> Oculto</span>;
     }
   };
 
@@ -197,8 +190,7 @@ const Periodos = () => {
                   <th className="h-12 px-4 text-left font-medium">Nombre</th>
                   <th className="h-12 px-4 text-left font-medium">Inicio</th>
                   <th className="h-12 px-4 text-left font-medium">Cierre</th>
-                  <th className="h-12 px-4 text-left font-medium">Carreras</th>
-                  <th className="h-12 px-4 text-left font-medium">Estado</th>
+                  <th className="h-12 px-4 text-left font-medium">Visibilidad</th>
                   <th className="h-12 px-4 text-center font-medium">Acciones</th>
                 </tr>
               </thead>
@@ -206,11 +198,11 @@ const Periodos = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="text-center p-4">Cargando...</td>
+                    <td colSpan={5} className="text-center p-4">Cargando...</td>
                   </tr>
                 ) : periodos.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center p-4 text-gray-500">
+                    <td colSpan={5} className="text-center p-4 text-gray-500">
                       No hay periodos registrados
                     </td>
                   </tr>
@@ -220,33 +212,7 @@ const Periodos = () => {
                       <td className="p-4 font-medium">{periodo.nombre}</td>
                       <td className="p-4">{dateFormatter(periodo.fechaInicio)}</td>
                       <td className="p-4">{dateFormatter(periodo.fechaCierre)}</td>
-
-                      <td className="p-4">
-                        {periodo.restriccionCarreras ? (
-                          <div className="flex gap-1">
-                            {periodo.restriccionCarreras.map((c) => (
-                              <span key={c} className="bg-gray-200 text-xs px-2 py-1 rounded-full">
-                                {c}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">Todas</span>
-                        )}
-                      </td>
-
-                      <td className="p-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            periodo.visible
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {periodo.visible ? "Visible" : "Oculto"}
-                        </span>
-                      </td>
-
+                      <td className="p-4">{renderVisibilidadBadge(periodo.visibilidad)}</td>
                       <td className="p-4 flex justify-center gap-2">
                         <button
                           onClick={() => handlePeriodoDialog(periodo)}
@@ -254,7 +220,6 @@ const Periodos = () => {
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
-
                         <button
                           onClick={() => handleDelete(periodo.id)}
                           className="p-2 hover:bg-gray-200 rounded-full text-red-600"
@@ -268,7 +233,6 @@ const Periodos = () => {
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
     </div>

@@ -4,11 +4,11 @@ import { ElectiveEntity } from "../entities/elective.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 import {
     handleErrorClient,
-    handleErrorServer
+    handleErrorServer,
 } from "../handlers/responseHandlers.js";
-import { checkInscriptionPeriod } from "../services/periodo.service.js";
 import { electiveBodyValidation } from "../validations/elective.validation.js";
 import { changeElectiveStatusService } from "../services/elective.service.js";
+import { checkTeacherPeriod } from "../services/periodo.service.js"; 
 
 export async function getAllElectives(req, res) {
     try {
@@ -23,7 +23,7 @@ export async function getAllElectives(req, res) {
         } else if (userRole === "docente") {
             queryOptions.where = [
                 { teacherRut: req.user.rut },
-                { status: "Aprobado" } 
+                { status: "Aprobado" }
             ];
         } else {
             queryOptions.where = { status: "Aprobado" };
@@ -61,6 +61,15 @@ export async function getElectiveById(req, res) {
 
 export async function createElective(req, res) {
     try {
+        if (req.user.role !== "docente") {
+            return handleErrorClient(res, 403, "Solo los docentes pueden crear electivos.");
+        }
+
+        const isPeriodActive = await checkTeacherPeriod();
+        if (!isPeriodActive) {
+            return handleErrorClient(res, 403, "No hay período activo para crear electivos en este momento.");
+        }
+
         const { error, value } = electiveBodyValidation.validate(req.body, {
             abortEarly: false,
             stripUnknown: true
@@ -69,10 +78,6 @@ export async function createElective(req, res) {
         if (error) {
             const errorMessages = error.details.map(detail => detail.message);
             return handleErrorClient(res, 400, "Error de validación", errorMessages.join(", "));
-        }
-
-        if (req.user.role !== "docente") {
-            return handleErrorClient(res, 403, "Solo los docentes pueden crear electivos.");
         }
 
         const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
@@ -99,8 +104,13 @@ export async function updateElective(req, res) {
     try {
         const { id } = req.params;
 
+        const isPeriodActive = await checkTeacherPeriod();
+        if (!isPeriodActive) {
+            return handleErrorClient(res, 403, "El período de edición de electivos ha finalizado.");
+        }
+
         const updateSchema = electiveBodyValidation.fork(
-            ["name", "description", "objectives", "prerrequisites", "startTime", "endTime", "weekDays", "quotas"],
+            ["name", "description", "objectives", "prerrequisites", "schedule", "quotas"],
             (schema) => schema.optional()
         );
 
@@ -130,11 +140,10 @@ export async function updateElective(req, res) {
         }
 
         Object.assign(elective, value);
-
         await electiveRepository.save(elective);
 
         return res.status(200).json({
-            message: "Electivo actualizado exitosamente. " + 
+            message: "Electivo actualizado exitosamente. " +
                      (elective.status === "Pendiente" ? "Vuelve a estar pendiente de revisión." : ""),
             data: elective
         });
@@ -148,6 +157,11 @@ export async function deleteElective(req, res) {
     try {
         const { id } = req.params;
 
+        const isPeriodActive = await checkTeacherPeriod();
+        if (!isPeriodActive) {
+            return handleErrorClient(res, 403, "El período de gestión de electivos ha finalizado.");
+        }
+
         const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
         const elective = await electiveRepository.findOne({ where: { id: parseInt(id) } });
 
@@ -155,7 +169,7 @@ export async function deleteElective(req, res) {
             return handleErrorClient(res, 404, "Electivo no encontrado.");
         }
 
-        if (elective.teacherRut !== req.user.rut && req.user.role !== "jefe_carrera" && req.user.role !== "administrador") {
+        if (elective.teacherRut !== req.user.rut && !["jefe_carrera", "administrador"].includes(req.user.role)) {
             return handleErrorClient(res, 403, "No tienes permiso para eliminar este electivo.");
         }
 
@@ -167,6 +181,7 @@ export async function deleteElective(req, res) {
         return handleErrorServer(res, 500, error.message);
     }
 }
+
 
 export async function updateElectiveStatus(req, res) {
     try {
