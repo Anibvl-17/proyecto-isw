@@ -4,25 +4,28 @@ import {
   getPeriodos, 
   getPeriodoById, 
   updatePeriodo, 
-  deletePeriodo 
+  deletePeriodo,
+  getActivePeriod 
 } from "../controllers/periodo.controller.js";
+
+// CORRECCIÓN: Ruta y nombre correctos del middleware
+import { authenticateJwt } from "../middleware/authentication.middleware.js";
 
 const router = Router();
 
-// Crear un nuevo periodo
+// Usamos el middleware con el nombre correcto
+router.use(authenticateJwt);
+
+// Rutas generales
+router.get("/", getPeriodos);
 router.post("/", createPeriodo);
 
-// Obtener todos los periodos
-router.get("/", getPeriodos);
+// Obtener periodo activo (antes de /:id para evitar conflictos)
+router.get("/active", getActivePeriod); 
 
-// Obtener un periodo específico por ID
+// Rutas específicas por ID
 router.get("/:id", getPeriodoById);
-
-// Actualizar un periodo por ID
 router.put("/:id", updatePeriodo);
-
-// Eliminar un periodo por ID
 router.delete("/:id", deletePeriodo);
-
 
 export default router;

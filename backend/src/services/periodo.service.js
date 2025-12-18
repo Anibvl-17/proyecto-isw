@@ -9,7 +9,7 @@ export async function createPeriodoService(data) {
   return await periodoRepository.save(nuevoPeriodo);
 }
 
-// Obtener todos los periodos (ordenados por fecha más reciente primero)
+// Obtener todos los periodos
 export async function getPeriodosService() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   return await periodoRepository.find({
@@ -25,7 +25,7 @@ export async function getPeriodoByIdService(id) {
   return periodo;
 }
 
-// Actualizar un periodo existente
+// Actualizar un periodo
 export async function updatePeriodoService(id, data) {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const periodo = await getPeriodoByIdService(id);
@@ -36,13 +36,13 @@ export async function updatePeriodoService(id, data) {
 // Eliminar un periodo
 export async function deletePeriodoService(id) {
   const periodoRepository = AppDataSource.getRepository(Periodo);
-  await getPeriodoByIdService(id); // Verifica que exista
+  await getPeriodoByIdService(id);
   const result = await periodoRepository.delete(id);
   if (result.affected === 0) throw new Error("No se pudo eliminar el período.");
   return { message: "Período eliminado exitosamente" };
 }
 
-// Verificar si hay periodo activo para ALUMNOS (inscribirse)
+// Verificar si hay período activo para ALUMNOS
 export async function checkInscriptionPeriod() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
@@ -58,7 +58,7 @@ export async function checkInscriptionPeriod() {
   return !!periodoActivo;
 }
 
-// Verificar si hay periodo activo para DOCENTES (crear/editar electivos)
+// Verificar si hay período activo para DOCENTES
 export async function checkTeacherPeriod() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
@@ -72,4 +72,31 @@ export async function checkTeacherPeriod() {
   });
 
   return !!periodoActivo;
+}
+
+// NUEVA Y CORREGIDA: Obtiene TODOS los periodos activos para el rol
+export async function getActivePeriodForRoleService(role) {
+  const periodoRepository = AppDataSource.getRepository(Periodo);
+  const now = new Date();
+
+  let visibilidadArray = ["todos"];
+
+  if (role === "alumno") {
+    visibilidadArray.push("alumnos");
+  } else if (role === "docente") {
+    visibilidadArray.push("docentes");
+  } else if (role === "jefe_carrera" || role === "administrador") {
+    visibilidadArray = ["todos", "alumnos", "docentes", "oculto"];
+  }
+
+  const periodosActivos = await periodoRepository.find({
+    where: {
+      fechaInicio: LessThanOrEqual(now),
+      fechaCierre: MoreThanOrEqual(now),
+      visibilidad: In(visibilidadArray),
+    },
+    order: { fechaCierre: "ASC" }, // El que termina antes primero
+  });
+
+  return periodosActivos; // Array (puede tener 0, 1 o más elementos)
 }

@@ -64,10 +64,9 @@ const Periodos = () => {
             <label class="text-sm font-medium">Fecha Cierre</label>
             <input type="datetime-local" id="fechaCierre" class="swal2-input m-0" value="${formatForInput(periodoToEdit?.fechaCierre)}">
           </div>
-          <div>
-            <label class="text-sm font-medium">Restricción Año (Opcional)</label>
-            <input type="number" id="restriccionAño" class="swal2-input m-0" placeholder="Ej: 4" value="${periodoToEdit?.restriccionAño || ''}">
-          </div>
+          
+          <!-- SE ELIMINÓ RESTRICCIÓN AÑO AQUÍ -->
+
           <div>
             <label class="text-sm font-medium">Visibilidad</label>
             <select id="visibilidad" class="swal2-select m-0">
@@ -87,7 +86,6 @@ const Periodos = () => {
         const nombre = document.getElementById("nombre").value.trim();
         const fechaInicio = document.getElementById("fechaInicio").value;
         const fechaCierre = document.getElementById("fechaCierre").value;
-        const restriccionAño = document.getElementById("restriccionAño").value;
         const visibilidad = document.getElementById("visibilidad").value;
 
         if (!nombre || !fechaInicio || !fechaCierre) {
@@ -103,7 +101,7 @@ const Periodos = () => {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionAño: restriccionAño ? parseInt(restriccionAño) : null,
+          restriccionAño: null, 
           visibilidad,
         };
       },
@@ -151,13 +149,13 @@ const Periodos = () => {
   const renderVisibilidadBadge = (visibilidad) => {
     switch (visibilidad) {
       case "todos":
-        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
+        return <span className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
       case "alumnos":
-        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
+        return <span className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
       case "docentes":
-        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200"><User className="w-4 h-4" /> Docentes</span>;
+        return <span className="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200"><User className="w-4 h-4" /> Docentes</span>;
       default:
-        return <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full border border-gray-200"><EyeOff className="w-4 h-4" /> Oculto</span>;
+        return <span className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full border border-gray-200"><EyeOff className="w-4 h-4" /> Oculto</span>;
     }
   };
 
