@@ -2,7 +2,7 @@ import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
 import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { createInscription } from "@services/inscription.service";
+import { createInscription, getInscription } from "@services/inscription.service";
 import { getElectiveById } from "@services/elective.service";
 import Swal from "sweetalert2";
 
@@ -16,6 +16,7 @@ export function Elective({
   const { user } = useAuth();
 
   const [Elective, setElective] = useState(elective);
+  const [myInscriptions, setMyInscriptions] = useState([]);
   const refreshIntervalMs = 5000; // Actualizar cupos cada 5 segundos
 
   const isAlumno = user.role === "alumno";
@@ -183,11 +184,34 @@ export function Elective({
     if (onDelete) onDelete(elective);
   };
 
+  const getMyInscriptions = async () => {
+  if (!isAlumno) return;
+
+  try {
+    const res = await getInscription();
+
+    if (res.success) {
+      setMyInscriptions(res.data || []);
+    }
+  } catch (error) {
+    console.error("Error al obtener inscripciones", error);
+  }
+  };
+
+  useEffect(() => {
+    getMyInscriptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAlumno]);
+
   // Tarjetas para alumnos
   const cardAlumno = () => {
 
     const availability = getAvailabilityBadge();
     const hasQuotas = (Elective?.quotas ?? 0) > 0;
+
+    const isAlreadyInscribed = myInscriptions.some(
+      (inscription) => inscription.electiveId === Elective?.id
+    );
 
     return (
       <div className="border border-gray-300 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-gray-400 bg-white">
@@ -251,14 +275,20 @@ export function Elective({
 
           <button
             onClick={handleInscription}
-            disabled={!hasQuotas}
+            disabled={!hasQuotas || isAlreadyInscribed}
             className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 
-                    ${hasQuotas
+              ${isAlreadyInscribed
+                ? "bg-gray-500 cursor-not-allowed"
+                :hasQuotas
                 ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md'
                 : 'bg-gray-400 cursor-not-allowed'}`}
           >
             <PlusCircle className="h-4 w-4" />
-            {hasQuotas ? "Inscribirse" : "Sin cupos"}
+            {isAlreadyInscribed
+              ? "Inscrito"
+              : hasQuotas
+              ? "Inscribirse"
+              : "Sin cupos"}
           </button>
         </div>
       </div>
@@ -418,9 +448,9 @@ async function electiveDetailsDialog(elective) {
       "<div>" +
       '<p class="font-bold text-sm text-gray-900 mb-2">Prerrequisitos</p>' +
       '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg">' +
-      (elective.prerequisites && elective.prerequisites.trim() !== ""
+      (elective.prerrequisites && elective.prerrequisites.trim() !== ""
         ? '<div class="flex flex-wrap gap-2">' +
-          elective.prerequisites
+          elective.prerrequisites
             .split(",")
             .map(
               (prereq) =>
