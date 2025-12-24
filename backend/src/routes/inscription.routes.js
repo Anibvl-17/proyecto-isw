@@ -15,7 +15,7 @@ const router = Router();
 router.use(authenticateJwt);
 
 router.get("/", verifyRoles(["docente", "alumno"]), getInscription); 
-router.get("/filter", verifyRoles(["alumno", "docente"]), getElectivesByPrerequisites);
+router.get("/filter", verifyRoles(["alumno", "docente", "jefe_carrera"]), getElectivesByPrerequisites);
 router.get("/:id", verifyRoles(["alumno"]), getInscriptionId);
 
 router.post("/", verifyRoles(["alumno", "docente"]), createInscription); 
