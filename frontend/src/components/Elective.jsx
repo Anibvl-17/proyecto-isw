@@ -1,7 +1,8 @@
 import { useAuth } from "@context/AuthContext";
 import { Badge } from "@components/Badge";
-import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle } from "lucide-react";
+import { Calendar, Pencil, Trash2, Eye, Users, Clock, CheckCircle, BookOpen, PlusCircle, AlertCircle, XCircle, Ban } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { createInscription, getInscription } from "@services/inscription.service";
 import { getElectiveById } from "@services/elective.service";
 import Swal from "sweetalert2";
@@ -14,6 +15,7 @@ export function Elective({
 }) {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [Elective, setElective] = useState(elective);
   const [myInscriptions, setMyInscriptions] = useState([]);
@@ -115,12 +117,16 @@ export function Elective({
     );
   };
 
-  const getAvailabilityBadge = () => {
+  const getAvailabilityBadge = (isAlreadyInscribed) => {
+    if (isAlreadyInscribed) {
+      return { text: "Inscrito", color: "bg-blue-100 text-blue-700" };
+    }
+
     const availableQuotas = Elective?.quotas ?? 0;
 
     if (availableQuotas > 0) {
       return { text: "Disponible", color: "bg-green-100 text-green-700" };
-    } else {
+    } else{
       return { text: "Sin cupos", color: "bg-red-100 text-red-700" };
     }
   };
@@ -206,12 +212,47 @@ export function Elective({
   // Tarjetas para alumnos
   const cardAlumno = () => {
 
-    const availability = getAvailabilityBadge();
     const hasQuotas = (Elective?.quotas ?? 0) > 0;
 
-    const isAlreadyInscribed = myInscriptions.some(
+    const isAlreadyInscribed = myInscriptions.find(
       (inscription) => inscription.electiveId === Elective?.id
     );
+
+    const availability = getAvailabilityBadge(isAlreadyInscribed);
+
+    let buttonText = "Inscribirse";
+    let buttonDisabled = false;
+    let buttonClass = "bg-blue-600 hover:bg-blue-700 hover:shadow-md";
+    let ButtonIcon = PlusCircle;
+
+    if (isAlreadyInscribed) {
+      if (isAlreadyInscribed.estado === "pendiente") {
+        buttonText = "Pendiente";
+        buttonDisabled = true;
+        buttonClass = "bg-yellow-500 cursor-not-allowed";
+        ButtonIcon = AlertCircle;
+      }
+
+      if (isAlreadyInscribed.estado === "aprobado") {
+        buttonText = "Aprobado";
+        buttonDisabled = true;
+        buttonClass = "bg-green-600 cursor-not-allowed";
+        ButtonIcon = CheckCircle;
+      }
+
+      if (isAlreadyInscribed.estado === "rechazado") {
+        buttonText = "Rechazado";
+        buttonDisabled = true;
+        buttonClass = "bg-red-600 cursor-not-allowed";
+        ButtonIcon = XCircle;
+      }
+    } else if (!hasQuotas) {
+      buttonText = "Solicitar inscripción";
+      buttonDisabled = false;
+      buttonClass = "bg-purple-600 hover:bg-purple-700 hover:shadow-md";
+      ButtonIcon = AlertCircle;
+    }
+
 
     return (
       <div className="border border-gray-300 rounded-lg overflow-hidden transition-all hover:shadow-lg hover:border-gray-400 bg-white">
@@ -274,21 +315,18 @@ export function Elective({
           </button>
 
           <button
-            onClick={handleInscription}
-            disabled={!hasQuotas || isAlreadyInscribed}
-            className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 
-              ${isAlreadyInscribed
-                ? "bg-gray-500 cursor-not-allowed"
-                :hasQuotas
-                ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md'
-                : 'bg-gray-400 cursor-not-allowed'}`}
+            onClick={() => {
+              if (!hasQuotas && !isAlreadyInscribed) {
+                navigate("/requests");
+              } else {
+                handleInscription();
+              }
+            }}
+            disabled={buttonDisabled}
+            className={`w-full px-3 py-2 text-sm font-medium text-white rounded-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${buttonClass}`}
           >
-            <PlusCircle className="h-4 w-4" />
-            {isAlreadyInscribed
-              ? "Inscrito"
-              : hasQuotas
-              ? "Inscribirse"
-              : "Sin cupos"}
+            <ButtonIcon className="h-4 w-4" />
+            {buttonText}
           </button>
         </div>
       </div>
@@ -374,6 +412,10 @@ export function Elective({
         </td>
       </tr>
     );
+  }
+
+  if (isAlumno && Elective?.status === "Rechazado") {
+    return null;
   }
 
   if (isAlumno) {
