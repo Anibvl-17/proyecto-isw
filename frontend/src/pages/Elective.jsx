@@ -74,9 +74,11 @@ const Electives = () => {
 
             const inscriptionsResponse = await axios.get(`/inscription/elective/${elective.id}`);
 
-            const hasInscriptions = inscriptionsResponse.data?.data?.length > 0;
+            const allInscriptions = inscriptionsResponse.data?.data || [];
 
-            if (hasInscriptions) {
+            const approvedInscriptions = allInscriptions.filter(inscription => inscription.estado === "aprobado");
+
+            if (approvedInscriptions.length > 0) {
                 return Swal.fire({
                     title: "No se puede eliminar",
                     html: `
@@ -90,7 +92,7 @@ const Electives = () => {
           </div>
         `,
                     icon: "warning",
-                    confirmButtonText: "Entendido",
+                    confirmButtonText: "Volver",
                     confirmButtonColor: "#3b82f6",
                     customClass: {
                         popup: "text-left",
@@ -99,9 +101,16 @@ const Electives = () => {
                 });
             }
 
+            const pendingOrRejected = allInscriptions.filter(inscription => inscription.estado !== "aprobado");
+
+            let confirmMessage = `¿Seguro que deseas eliminar el electivo "${elective.name}"?`;
+            if (pendingOrRejected.length > 0) {
+                confirmMessage = `El electivo tiene ${pendingOrRejected.length} postulación(es) pendiente(s) o rechazada(s). ¿Deseas eliminarlo de todas formas?`;
+            }
+
             const result = await Swal.fire({
                 title: "Eliminar electivo",
-                text: `¿Seguro que deseas eliminar el electivo "${elective.name}"?`,
+                text: confirmMessage,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Sí, eliminar",
@@ -115,17 +124,30 @@ const Electives = () => {
                 Swal.fire({ toast: true, title: response.message || "Electivo eliminado exitosamente", icon: "success", timer: 4000, timerProgressBar: true, position: "bottom-end", showConfirmButton: false });
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
-        } catch {
-            showErrorAlert("Error", "No se pudo eliminar el electivo");
+        } catch (error){
+            console.error("Error al eliminar:", error);
 
             if (error.response?.status === 400 &&
-                error.response?.data?.message?.includes("inscripciones")) {
+                error.response?.data?.message?.includes("inscrito")) {
                 return Swal.fire({
                     title: "No se puede eliminar",
-                    text: error.response.data.message,
+                    html: `
+                    <div class="text-left">
+                        <p class="mb-3">El electivo <strong>"${elective.name}"</strong> no puede ser eliminado porque ya tiene inscripciones asociadas.</p>
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                            <p class="text-sm text-amber-800">
+                                <strong>Sugerencia:</strong> Si necesitas hacer cambios, puedes editar el electivo.
+                            </p>
+                        </div>
+                    </div>
+                `,
                     icon: "warning",
-                    confirmButtonText: "Entendido",
-                    confirmButtonColor: "#3b82f6"
+                    confirmButtonText: "Volver",
+                    confirmButtonColor: "#3b82f6",
+                    customClass: {
+                        popup: "text-left",
+                        htmlContainer: "text-left"
+                    }
                 });
             }
 
