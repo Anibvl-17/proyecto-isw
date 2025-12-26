@@ -198,7 +198,7 @@ const handleViewDetails = async (elective) => {
 const changeStatus = async (id, status) => {
     const action = status === "Aprobado" ? "aprobado" : "rechazado";
     const confirm = await Swal.fire({
-        title: `¿${action} electivo?`,
+        title: `¿El electivo es ${action}?`,
         text: status === "Aprobado"
             ? "El electivo será visible para los alumnos."
             : "El docente deberá editarlo para reenviarlo.",
