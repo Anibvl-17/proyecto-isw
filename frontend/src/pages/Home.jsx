@@ -111,14 +111,16 @@ const Home = () => {
 
                 <div className="flex flex-row gap-4 w-full">
                   {/* CARD 1 solo para alumno */}
-                  <div className="rounded-lg bg-sky-100 p-4 flex-1">
-                    <p className="text-md font-medium text-gray-700">
-                      Tu carrera
-                    </p>
-                    <p className="text-lg font-semibold text-blue-700">
-                      Ingeniería de Ejecución en Computación e Informática
-                    </p>
-                  </div>
+                  {isAlumno &&
+                    <div className="rounded-lg bg-sky-100 p-4 flex-1">
+                      <p className="text-md font-medium text-gray-700">
+                        Tu carrera
+                      </p>
+                      <p className="text-lg font-semibold text-blue-700">
+                        Ingeniería de Ejecución en Computación e Informática
+                      </p>
+                    </div>
+                  }
 
                   {/* CARD 2 */}
                   <div className="rounded-lg bg-blue-100/75 p-4 flex-1">
