@@ -14,6 +14,10 @@ import { useEffect, useState } from "react";
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isAlumno = user.role === "alumno";
+  const isDocente = user.role === "docente";
+  const isAdmin = user.role === "administrador";
+  const isJefeCarrera = user.role === "jefe_carrera";
 
   const [loading, setLoading] = useState(false);
   const [electiveCounter, setElectiveCounter] = useState(0);
@@ -60,6 +64,18 @@ const Home = () => {
     });
   };
 
+  const getHomeDescription = () => {
+    if (isAlumno) {
+      return "Gestiona tus inscripciones y solicitudes desde aquí";
+    } else if (isDocente) {
+      return "Gestiona tus electivos y las solicitudes de estudiantes desde aquí";
+    } else if (isJefeCarrera) {
+      return "Gestiona los períodos, las solicitudes excepcionales y los electivos desde aquí";
+    } else if (isAdmin) {
+      return "Gestiona los períodos y los usuarios del sistema desde aquí"
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -70,9 +86,8 @@ const Home = () => {
           <div className="flex flex-row flex-1 justify-between items-center">
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-2xl">Inicio</h1>
-              
               <p className="text-gray-600">
-                Gestiona tus electivos, inscripciones y solicitudes desde aquí
+                {getHomeDescription()}
               </p>
             </div>
           </div>
@@ -95,7 +110,7 @@ const Home = () => {
                 </div>
 
                 <div className="flex flex-row gap-4 w-full">
-                  {/* CARD 1 */}
+                  {/* CARD 1 solo para alumno */}
                   <div className="rounded-lg bg-sky-100 p-4 flex-1">
                     <p className="text-md font-medium text-gray-700">
                       Tu carrera
