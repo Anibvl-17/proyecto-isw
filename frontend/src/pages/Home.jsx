@@ -7,9 +7,10 @@ import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Badge } from "@components/Badge";
 import HomeCard from "@components/HomeCard";
-import { FilePenLine, GraduationCap, MessageSquareText } from "lucide-react";
+import { CalendarRangeIcon, FilePenLine, GraduationCap, MessageSquareText, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getUsers } from "@services/user.service";
 
 const Home = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const Home = () => {
   const [electiveCounter, setElectiveCounter] = useState(0);
   const [inscriptionCounter, setInscriptionCounter] = useState(0);
   const [requestCounter, setRequestsCounter] = useState(0);
+  const [userCounter, setUserCounter] = useState(0);
 
   // AHORA ES ARRAY
   const [activePeriods, setActivePeriods] = useState([]);
@@ -34,6 +36,7 @@ const Home = () => {
       const electiveResult = await getElectives();
       const requestsResult = await getRequests();
       const activePeriodsResult = await getActivePeriod();
+      const usersResult = isAdmin ? await getUsers() : null;
 
       if (inscriptionResult.success)
         setInscriptionCounter(inscriptionResult.data?.length || 0);
@@ -41,6 +44,8 @@ const Home = () => {
         setRequestsCounter(requestsResult.data?.length || 0);
       if (electiveResult.success)
         setElectiveCounter(electiveResult.data?.length || 0);
+      if (usersResult != null && usersResult.success)
+        setUserCounter(usersResult.data?.length || 0);
 
       // Siempre array
       setActivePeriods(activePeriodsResult || []);
@@ -213,6 +218,70 @@ const Home = () => {
                       color="purple"
                       btnText="Ir a inscripciones"
                       onClick={() => navigate("/inscription")}
+                    />
+                  </>
+                )}
+
+                {isDocente && (
+                  <>
+                    <HomeCard
+                      icon={GraduationCap}
+                      counter={electiveCounter}
+                      text={electiveCounter === 1 ? "electivo disponible" : "electivos disponibles"}
+                      color="purple"
+                      btnText="Ir a electivos"
+                      onClick={() => navigate("/electives")}
+                    />
+                    <HomeCard
+                      icon={FilePenLine}
+                      counter={inscriptionCounter}
+                      text={inscriptionCounter === 1 ? "inscripción solicitada" : "inscripciones solicitadas"}
+                      color="blue"
+                      btnText="Ir a inscripciones"
+                      onClick={() => navigate("/inscription")}
+                    />
+                  </>
+                )}
+
+                {isJefeCarrera && (
+                  <>
+                    <HomeCard
+                      icon={CalendarRangeIcon}
+                      counter={activePeriods.length}
+                      text={requestCounter === 1 ? "período activo" : "períodos activos"}
+                      color="sky"
+                      btnText="Ir a períodos"
+                      onClick={() => navigate("/periodos")}
+                    />
+                    <HomeCard
+                      icon={MessageSquareText}
+                      counter={requestCounter}
+                      text={requestCounter === 1 ? "solicitud disponible" : "solicitudes disponibles"}
+                      color="blue"
+                      btnText="Ir a solicitudes"
+                      onClick={() => navigate("/requests")}
+                    />
+                    <HomeCard
+                      icon={GraduationCap}
+                      counter={electiveCounter}
+                      text={electiveCounter === 1 ? "electivo disponible" : "electivos disponibles"}
+                      color="purple"
+                      btnText="Ir a electivos"
+                      onClick={() => navigate("/electives")}
+                    />
+                  </>
+                )}
+
+                {isAdmin && (
+                  <>
+                    <HomeCard
+                      icon={Users}
+                      counter={userCounter}
+                      text={userCounter === 1 ? "usuario registrado" : "usuarios registrados"}
+                      color="sky"
+                      btnText="Ir a usuarios"
+                      onClick={() => navigate("/users")}
+                      flexOne={false} // Como es solo un card, se usa sin flex-1 para que no se extienda completa
                     />
                   </>
                 )}
