@@ -485,19 +485,9 @@ async function electiveDetailsDialog(elective) {
       "</div>" +
       "<div>" +
       '<p class="font-bold text-sm text-gray-900 mb-2">Prerrequisitos</p>' +
-      '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg">' +
+      '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg leading-relaxed">' +
       (elective.prerrequisites && elective.prerrequisites.trim() !== ""
-        ? '<div class="flex flex-wrap gap-2">' +
-        elective.prerrequisites
-          .split(",")
-          .map(
-            (prereq) =>
-              '<span class="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-medium">' +
-              prereq.trim() +
-              "</span>"
-          )
-          .join("") +
-        "</div>"
+        ? elective.prerrequisites
         : '<span class="italic text-gray-500">Ninguno</span>') +
       "</div>" +
       "</div>" +

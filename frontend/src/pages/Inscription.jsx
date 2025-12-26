@@ -12,13 +12,14 @@ const Inscriptions = () => {
   const [loading, setLoading] = useState(false);
   const [inscriptions, setInscriptions] = useState([]);
 
-  const [pendingCounter, setPendingCounter] = useState(0);
-  const [approvedCounter, setApprovedCounter] = useState(0);
-  const [rejectedCounter, setRejectedCounter] = useState(0);
-
   const [showPending, togglePending] = useState(true);
   const [showApproved, toggleApproved] = useState(true);
   const [showRejected, toggleRejected] = useState(true);
+
+  const pendingCounter = inscriptions.filter(i => i.estado === "pendiente").length;
+  const approvedCounter = inscriptions.filter(i => i.estado === "aprobado").length;
+  const rejectedCounter = inscriptions.filter(i => i.estado === "rechazado").length;
+
 
   const { user } = useAuth();
   const isAlumno = user.role === "alumno";
@@ -26,9 +27,6 @@ const Inscriptions = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      setPendingCounter(0);
-      setApprovedCounter(0);
-      setRejectedCounter(0);
 
       const result = await getInscription();
       if (result.success) {
@@ -39,11 +37,6 @@ const Inscriptions = () => {
         });
 
         setInscriptions(sorted);
-
-        // Contadores
-        setPendingCounter(sorted.filter(inscription => inscription.estado === "pendiente").length);
-        setApprovedCounter(sorted.filter(inscription => inscription.estado === "aprobado").length);
-        setRejectedCounter(sorted.filter(inscription => inscription.estado === "rechazado").length);
       }
     } catch (error) {
       showErrorAlert("Error", "No se pudieron cargar las inscripciones", error);
@@ -51,6 +44,13 @@ const Inscriptions = () => {
       setLoading(false);
     }
   };
+
+  const handleDeleteInscription = (id) => {
+    setInscriptions((prev) =>
+      prev.filter((inscription) => inscription.id !== id)
+    );
+  };
+
 
   useEffect(() => {
     fetchData();
@@ -103,7 +103,7 @@ const Inscriptions = () => {
                     <Inscription
                       key={inscription.id}
                       inscription={inscription}
-                      onActionSuccess={fetchData}
+                      onActionSuccess={handleDeleteInscription}
                     />
                   );
                 }
@@ -114,7 +114,7 @@ const Inscriptions = () => {
                     <Inscription
                       key={inscription.id}
                       inscription={inscription}
-                      onActionSuccess={fetchData}
+                      onActionSuccess={handleDeleteInscription}
                     />
                   );
                 }
@@ -125,7 +125,7 @@ const Inscriptions = () => {
                     <Inscription
                       key={inscription.id}
                       inscription={inscription}
-                      onActionSuccess={fetchData}
+                      onActionSuccess={handleDeleteInscription}
                     />
                   );
                 }

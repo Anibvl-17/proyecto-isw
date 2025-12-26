@@ -102,7 +102,7 @@ export function Inscription({
           const result = await deleteInscription(inscription.id);
           if (result.success) {
             showSuccessToast("Inscripción eliminada correctamente");
-            if (onActionSuccess) onActionSuccess();
+            if (onActionSuccess) onActionSuccess(inscription.id);
           } else {
             showErrorAlert("Error", result.message);
           }
