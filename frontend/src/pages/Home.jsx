@@ -188,7 +188,7 @@ const Home = () => {
 
               {/* Cards */}
               <div className="flex flex-row gap-6">
-                {user.role === "alumno" && (
+                {isAlumno && (
                   <>
                     <HomeCard
                       icon={MessageSquareText}
