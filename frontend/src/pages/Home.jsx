@@ -76,6 +76,19 @@ const Home = () => {
     }
   }
 
+  const getSummaryText = () => {
+    if (isAlumno) {
+      
+      return "Revisa el estado de tus solicitudes, electivos e inscripciones";
+    } else if (isDocente) {
+      return "Revisa los electivos y solicitudes de estudiantes";
+    } else if (isJefeCarrera) {
+      return "Revisa los períodos, las solicitudes excepcionales y los electivos";
+    } else if (isAdmin) {
+      return "Revisa los usuarios y períodos del sistema"
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -169,8 +182,7 @@ const Home = () => {
                   Resumen de actividades
                 </h2>
                 <p className="text-gray-600">
-                  Revisa el estado de tus solicitudes, electivos e inscripciones
-                  del periodo actual
+                  {getSummaryText()}
                 </p>
               </div>
 
