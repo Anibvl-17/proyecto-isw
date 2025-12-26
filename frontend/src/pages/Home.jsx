@@ -20,7 +20,7 @@ const Home = () => {
   const [inscriptionCounter, setInscriptionCounter] = useState(0);
   const [requestCounter, setRequestsCounter] = useState(0);
 
-  // ⬅️ AHORA ES ARRAY
+  // AHORA ES ARRAY
   const [activePeriods, setActivePeriods] = useState([]);
 
   const fetchData = async () => {
@@ -38,7 +38,7 @@ const Home = () => {
       if (electiveResult.success)
         setElectiveCounter(electiveResult.data?.length || 0);
 
-      // ⬅️ Siempre array
+      // Siempre array
       setActivePeriods(activePeriodsResult || []);
     } catch (error) {
       console.error("Error en Home => fetchData():", error);
@@ -70,6 +70,7 @@ const Home = () => {
           <div className="flex flex-row flex-1 justify-between items-center">
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-2xl">Inicio</h1>
+              
               <p className="text-gray-600">
                 Gestiona tus electivos, inscripciones y solicitudes desde aquí
               </p>
@@ -104,7 +105,7 @@ const Home = () => {
                     </p>
                   </div>
 
-                  {/* CARD 2 (NO TOCADA) */}
+                  {/* CARD 2 */}
                   <div className="rounded-lg bg-blue-100/75 p-4 flex-1">
                     <p className="text-md font-medium text-gray-700">
                       Periodo actual
@@ -114,7 +115,7 @@ const Home = () => {
                     </p>
                   </div>
 
-                  {/* CARD 3 (MEJORADA) */}
+                  {/* CARD 3 */}
                   <div className="rounded-lg bg-purple-100/50 p-4 flex-1">
                     {activePeriods.length > 0 ? (
                       activePeriods.map((periodo) => (
