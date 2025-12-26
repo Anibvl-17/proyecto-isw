@@ -140,3 +140,36 @@ export async function getElectivesByPrerequisites(req, res){
         handleErrorServer(res, 500, "Error al obtener los electivos", error.message);
     }
 }
+
+export async function getInscriptionsByElective(req, res){
+    try {
+        const { id } = req.params;
+
+        const electiveId = parseInt(id);
+        if (isNaN(electiveId)) {
+            return handleErrorClient(res, 400, "ID de electivo inválido");
+        }
+
+        let inscriptions = await getInscriptionService();
+
+        inscriptions = inscriptions.filter(
+            (inscription) => inscription.electiveId === electiveId
+        );
+
+        return handleSuccess(
+            res,
+            200,
+            inscriptions.length === 0
+            ? "No hay inscripciones para este electivo"
+            : "Inscripciones encontradas",
+            inscriptions
+        );
+    } catch (error) {
+        return handleErrorServer(
+            res,
+            500,
+            "Error al obtener las inscripciones",
+            error.message
+        );
+    }
+}
