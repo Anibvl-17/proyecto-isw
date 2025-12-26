@@ -195,7 +195,7 @@ export async function deleteElective(req, res) {
 export async function updateElectiveStatus(req, res) {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, rejectReason } = req.body;
 
         if (!["jefe_carrera", "administrador"].includes(req.user.role)) {
             return handleErrorClient(res, 403, "Solo el jefe de carrera o administrador puede cambiar el estado.");
@@ -205,7 +205,11 @@ export async function updateElectiveStatus(req, res) {
             return handleErrorClient(res, 400, "Estado inválido. Debe ser 'Aprobado' o 'Rechazado'.");
         }
 
-        const elective = await changeElectiveStatusService(id, status);
+        if (status === "Rechazado" && (!rejectReason || rejectReason.trim().length < 10)) {
+            return handleErrorClient(res, 400, "Debe proporcionar un motivo de rechazo de al menos 10 caracteres.");
+        }
+
+        const elective = await changeElectiveStatusService(id, status, rejectReason);
 
         return res.status(200).json({
             message: `Electivo ${status.toLowerCase()} exitosamente.`,

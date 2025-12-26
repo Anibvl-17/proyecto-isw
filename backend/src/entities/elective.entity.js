@@ -48,6 +48,11 @@ export const ElectiveEntity = new EntitySchema({
             default: "Pendiente",
             nullable: false,
         },
+        rejectReason: {
+            type: "text",
+            nullable: true,
+            comment: "Motivo de rechazo"
+        },
         createdAt: {
             type: "timestamp",
             createDate: true,

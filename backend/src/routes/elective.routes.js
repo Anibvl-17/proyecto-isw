@@ -16,11 +16,12 @@ const router = Router();
 
 router.use(authenticateJwt);
 
+router.patch("/status/:id", updateElectiveStatus);
+
 router.get("/", getAllElectives);                    
 router.get("/:id", getElectiveById);                 
 router.post("/", createElective);                    
 router.patch("/:id", updateElective);                
 router.delete("/:id", deleteElective);               
-router.patch("/:id/status", updateElectiveStatus);   
-
+   
 export default router;
