@@ -118,44 +118,51 @@ const Electives = () => {
         } catch {
             showErrorAlert("Error", "No se pudo eliminar el electivo");
 
-        if (error.response?.status === 400 &&
-            error.response?.data?.message?.includes("inscripciones")) {
-            return Swal.fire({
-                title: "No se puede eliminar",
-                text: error.response.data.message,
-                icon: "warning",
-                confirmButtonText: "Entendido",
-                confirmButtonColor: "#3b82f6"
-            });
+            if (error.response?.status === 400 &&
+                error.response?.data?.message?.includes("inscripciones")) {
+                return Swal.fire({
+                    title: "No se puede eliminar",
+                    text: error.response.data.message,
+                    icon: "warning",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#3b82f6"
+                });
+            }
+
+            showErrorAlert("Error", "No se pudo eliminar el electivo");
         }
 
-        showErrorAlert("Error", "No se pudo eliminar el electivo");
-    }
-
-};
-
-const handleViewDetails = async (elective) => {
-
-    const formatScheduleForDialog = () => {
-        if (elective.schedule && Array.isArray(elective.schedule) && elective.schedule.length > 0) {
-            return elective.schedule
-                .map(entry => `${entry.day} ${entry.startTime?.substring(0, 5)}-${entry.endTime?.substring(0, 5)}`)
-                .join(", ");
-        }
-        return "No especificado";
     };
 
-    const isPendiente = elective.status === "Pendiente";
+    const handleViewDetails = async (elective) => {
 
-    const result = await Swal.fire({
-        title: `<h3 class="text-xl font-bold">${elective.name}</h3>`,
-        html: `
+        const formatScheduleForDialog = () => {
+            if (elective.schedule && Array.isArray(elective.schedule) && elective.schedule.length > 0) {
+                return elective.schedule
+                    .map(entry => `${entry.day} ${entry.startTime?.substring(0, 5)}-${entry.endTime?.substring(0, 5)}`)
+                    .join(", ");
+            }
+            return "No especificado";
+        };
+
+        const isPendiente = elective.status === "Pendiente";
+        const isRechazado = elective.status === "Rechazado";
+
+        const result = await Swal.fire({
+            title: `<h3 class="text-xl font-bold">${elective.name}</h3>`,
+            html: `
                 <div class="text-left space-y-3 p-2">
                     <p><strong>Estado:</strong> 
                         <span class="${elective.status === 'Aprobado' ? 'text-green-600' : elective.status === 'Rechazado' ? 'text-red-600' : 'text-yellow-600'} font-bold">
                             ${elective.status}
                         </span>
                     </p>
+                    ${isRechazado && elective.rejectReason ? `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
+                        <p class="text-xs font-semibold text-gray-700 mb-1">Motivo del rechazo:</p>
+                        <p class="text-sm text-red-800">${elective.rejectReason}</p>
+                    </div>
+                    ` : ''}
                     <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <p class="text-sm text-gray-500 font-semibold">Descripción</p>
                         <p class="mb-2">${elective.description}</p>
@@ -174,229 +181,270 @@ const handleViewDetails = async (elective) => {
                         <p class="text-sm font-semibold text-gray-700">Prerrequisitos</p>
                         <p class="text-sm text-gray-900">${elective.prerrequisites || 'Ninguno'}</p>
                     </div>
+                     ${isPendiente && isJefeCarrera ? `
+                    <div class="mt-4">
+                        <label for="rejectReason" class="text-sm font-semibold text-gray-700 block mb-1">
+                            Motivo de rechazo <span class="text-gray-400 font-normal">(requerido si rechazas)</span>
+                        </label>
+                        <textarea 
+                            id="rejectReason" 
+                            rows="3" 
+                            maxlength="500"
+                            class="w-full border border-gray-300 px-3 py-2 text-sm rounded-md resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            placeholder="Escribe el motivo del rechazo..."
+                        ></textarea>
+                        <span class="text-xs text-gray-500 mt-1 block">Mínimo 10 caracteres</span>
+                    </div>
+                    ` : ''}
                 </div>
             `,
-        showCloseButton: true,
-        showCancelButton: true,
-        cancelButtonText: "Cerrar",
-        showConfirmButton: isJefeCarrera && isPendiente,
-        showDenyButton: isJefeCarrera && isPendiente,
-        confirmButtonText: "Aprobar",
-        denyButtonText: "Rechazar",
-        confirmButtonColor: "#10B981",
-        denyButtonColor: "#EF4444",
-        width: "600px",
-    });
+            showCloseButton: true,
+            showCancelButton: true,
+            cancelButtonText: "Cerrar",
+            showConfirmButton: isJefeCarrera && isPendiente,
+            showDenyButton: isJefeCarrera && isPendiente,
+            confirmButtonText: "Aprobar",
+            denyButtonText: "Rechazar",
+            confirmButtonColor: "#10B981",
+            denyButtonColor: "#EF4444",
+            width: "600px",
+        });
 
-    if (result.isConfirmed) {
-        await changeStatus(elective.id, "Aprobado");
-    } else if (result.isDenied) {
-        await changeStatus(elective.id, "Rechazado");
-    }
-};
+        if (result.isConfirmed) {
+            await changeStatus(elective.id, "Aprobado", null);
+        } else if (result.isDenied) {
+            const rejectReason = document.getElementById("rejectReason")?.value.trim();
 
-const changeStatus = async (id, status) => {
-    const action = status === "Aprobado" ? "aprobado" : "rechazado";
-    const confirm = await Swal.fire({
-        title: `¿El electivo es ${action}?`,
-        text: status === "Aprobado"
-            ? "El electivo será visible para los alumnos."
-            : "El docente deberá editarlo para reenviarlo.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: `Sí, ${action}`,
-        cancelButtonText: "Cancelar",
-        confirmButtonColor: status === "Aprobado" ? "#10B981" : "#EF4444",
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    const response = await changeElectiveStatus(id, status);
-    if (response.success) {
-        Swal.fire("¡Listo!", `Electivo ${action} exitosamente.`, "success");
-        await fetchElectives();
-    } else {
-        showErrorAlert("Error", response.message || "No se pudo cambiar el estado");
-    }
-}
-
-const handleFilterToggle = async () => {
-    setLoading(true);
-    try {
-        if (isFilterActive) {
-            // Si el filtro estaba activo, lo desactivamos y volvemos a cargar TODOS
-            await fetchElectives();
-            setIsFilterActive(false);
-        } else {
-            // Si el filtro estaba inactivo, llamamos al servicio de pero Sin Requisitos
-            const result = await getElectivesByPrerequisites();
-            if (result.success) {
-                setElectives(result.data || []);
-                setIsFilterActive(true);
-
-                Swal.fire({
-                    toast: true,
-                    title: "Filtro aplicado: Sin requisitos",
-                    icon: "info",
-                    timer: 2000,
-                    position: "bottom-end",
-                    showConfirmButton: false
+            if (!rejectReason || rejectReason.length < 10) {
+                return Swal.fire({
+                    title: "Motivo requerido",
+                    text: "Debe ingresar un motivo de rechazo de al menos 10 caracteres.",
+                    icon: "warning",
+                    confirmButtonText: "Entendido",
+                    ConfirmButtonColor: "#3b82f6"
                 });
-            } else {
-                showErrorAlert("Error", result.message);
             }
+
+            await changeStatus(elective.id, "Rechazado", rejectReason);
         }
-    } catch (error) {
-        console.error("Error al filtrar:", error);
-        showErrorAlert("Error", "No se pudo aplicar el filtro");
-    } finally {
-        setLoading(false);
+    };
+
+    const changeStatus = async (id, status, rejectReason = null) => {
+        const action = status === "Aprobado" ? "aprobado" : "rechazado";
+        const confirm = await Swal.fire({
+            title: `¿El electivo es ${action}?`,
+            text: status === "Aprobado"
+                ? "El electivo será visible para los alumnos."
+                : "El docente deberá editarlo para reenviarlo.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: `Sí, ${action}`,
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: status === "Aprobado" ? "#10B981" : "#EF4444",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        const payload = { status };
+        if (status === "Rechazado" && rejectReason) {
+            payload.rejectReason = rejectReason;
+        }
+
+        const response = await changeElectiveStatus(id, payload);
+        if (response.success) {
+            Swal.fire("¡Listo!", `Electivo ${action} exitosamente.`, "success");
+            await fetchElectives();
+        } else {
+            showErrorAlert("Error", response.message || "No se pudo cambiar el estado");
+        }
     }
-};
 
-return (
-    <div className="min-h-screen bg-gray-100">
-        <Header />
-        <Sidebar />
-        <div className="ml-72 flex flex-col p-4">
-            <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-5 flex flex-col gap-6">
-                <div className="flex flex-row justify-between items-center">
-                    <div className="flex flex-col gap-2">
-                        <h1 className="font-bold text-2xl">Electivos</h1>
-                        <p className="text-gray-600">
-                            {isDocente ? (
-                                "Crea, actualiza y administra tus electivos."
-                            ) : isJefeCarrera ? (
-                                "Evalúa los electivos."
-                            ) : isAlumno ? (
-                                "Revisa los electivos disponibles para inscripción."
-                            ) : (
-                                ""
-                            )}
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        {(isAlumno || isJefeCarrera) && (
-                            <button
-                                onClick={handleFilterToggle}
-                                className={`font-medium text-sm px-4 py-2 flex flex-row items-center gap-2 rounded-lg transition-all border
+    const handleFilterToggle = async () => {
+        setLoading(true);
+        try {
+            if (isFilterActive) {
+                // Si el filtro estaba activo, lo desactivamos y volvemos a cargar TODOS
+                await fetchElectives();
+                setIsFilterActive(false);
+            } else {
+                // Si el filtro estaba inactivo, llamamos al servicio de pero Sin Requisitos
+                const result = await getElectivesByPrerequisites();
+                if (result.success) {
+                    setElectives(result.data || []);
+                    setIsFilterActive(true);
+
+                    Swal.fire({
+                        toast: true,
+                        title: "Filtro aplicado: Sin requisitos",
+                        icon: "info",
+                        timer: 2000,
+                        position: "bottom-end",
+                        showConfirmButton: false
+                    });
+                } else {
+                    showErrorAlert("Error", result.message);
+                }
+            }
+        } catch (error) {
+            console.error("Error al filtrar:", error);
+            showErrorAlert("Error", "No se pudo aplicar el filtro");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-100">
+            <Header />
+            <Sidebar />
+            <div className="ml-72 flex flex-col p-4">
+                <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-5 flex flex-col gap-6">
+                    <div className="flex flex-row justify-between items-center">
+                        <div className="flex flex-col gap-2">
+                            <h1 className="font-bold text-2xl">Electivos</h1>
+                            <p className="text-gray-600">
+                                {isDocente ? (
+                                    "Crea, actualiza y administra tus electivos."
+                                ) : isJefeCarrera ? (
+                                    "Evalúa los electivos."
+                                ) : isAlumno ? (
+                                    "Revisa los electivos disponibles para inscripción."
+                                ) : (
+                                    ""
+                                )}
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            {(isAlumno || isJefeCarrera) && (
+                                <button
+                                    onClick={handleFilterToggle}
+                                    className={`font-medium text-sm px-4 py-2 flex flex-row items-center gap-2 rounded-lg transition-all border
                                         ${isFilterActive
-                                        ? "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200"
-                                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                                    }`}
-                            >
-                                {isFilterActive ? <X className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
-                                {isFilterActive ? "Quitar filtro" : "Sin requisitos"}
-                            </button>
+                                            ? "bg-purple-100 text-purple-700 border-purple-300 hover:bg-purple-200"
+                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                        }`}
+                                >
+                                    {isFilterActive ? <X className="h-4 w-4" /> : <Filter className="h-4 w-4" />}
+                                    {isFilterActive ? "Quitar filtro" : "Sin requisitos"}
+                                </button>
+                            )}
+
+                            {isDocente && (<button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md"><PlusCircle className="h-4 w-4" />Nuevo electivo</button>)}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-row flex-1 gap-4 justify-start items-center">
+                        {loading && <Badge text="Cargando" />}
+                        {!loading && electives.length === 0 && (
+                            <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
+                                <CheckCircle className="h-5 w-5" />
+                                No hay electivos disponibles.
+                            </p>
                         )}
-
-                        {isDocente && (<button onClick={handleCreateElective} className="bg-blue-700 text-white font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg transition-all hover:shadow-md hover:bg-blue-700/90 active:bg-blue-700/80 active:scale-95 active:shadow-md"><PlusCircle className="h-4 w-4" />Nuevo electivo</button>)}
+                        {!loading && electives.length > 0 && (
+                            <Badge type="info" text={`${electives.length} electivo${electives.length > 1 ? "s" : ""}`} />
+                        )}
                     </div>
-                </div>
-
-                <div className="flex flex-row flex-1 gap-4 justify-start items-center">
-                    {loading && <Badge text="Cargando" />}
-                    {!loading && electives.length === 0 && (
-                        <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
-                            <CheckCircle className="h-5 w-5" />
-                            No hay electivos disponibles.
-                        </p>
+                    {!loading && electives.length > 0 && isAlumno && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {electives.map((elective) => (
+                                <Elective
+                                    key={elective.id}
+                                    elective={elective}
+                                    onEdit={fetchElectives}
+                                />
+                            ))}
+                        </div>
                     )}
-                    {!loading && electives.length > 0 && (
-                        <Badge type="info" text={`${electives.length} electivo${electives.length > 1 ? "s" : ""}`} />
-                    )}
-                </div>
-                {!loading && electives.length > 0 && isAlumno && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {electives.map((elective) => (
-                            <Elective
-                                key={elective.id}
-                                elective={elective}
-                                onEdit={fetchElectives}
-                            />
-                        ))}
-                    </div>
-                )}
-                {!loading && electives.length > 0 && (isDocente || isJefeCarrera) && (
-                    <div className="w-full border border-gray-300 rounded-lg">
-                        <table className="w-full caption-bottom text-sm">
-                            <thead className="border-b border-gray-300 bg-gray-50">
-                                <tr>
-                                    <th className="min-w-32 h-12 px-4 text-left font-medium">Nombre</th>
-                                    <th className="min-w-40 h-12 px-4 text-left font-medium">Descripción</th>
-                                    <th className="min-w-32 h-12 px-4 text-center font-medium">Horario</th>
-                                    <th className="min-w-20 h-12 px-4 text-center font-medium">Cupos</th>
-                                    <th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>
-                                    {isDocente && (
-                                        <th className="min-w-24 h-12 px-4 text-center font-medium">Acciones</th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {electives.map((elective) => (
-                                    <tr key={elective.id}>
-                                        <td className="px-4 py-3">{elective.name}</td>
-                                        <td className="px-4 py-3 text-gray-600 text-xs">{elective.description}</td>
-                                        <td className="px-4 py-3 text-gray-600 text-xs text-center">
-                                            <div className="flex flex-col items-center gap-1">
-                                                {!elective.schedule || !Array.isArray(elective.schedule) || elective.schedule.length === 0 ? (
-                                                    <span className="text-gray-500 italic">No especificado</span>
-                                                ) : (
-                                                    elective.schedule.map((entry, idx) => (
-                                                        <div key={idx} className="flex flex-col items-center">
-                                                            <span className="font-semibold text-gray-900 text-xs">
-                                                                {entry.startTime?.substring(0, 5)} - {entry.endTime?.substring(0, 5)}
-                                                            </span>
-                                                            <span className="text-xs text-gray-600">{entry.day}</span>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-center font-medium">{elective.quotas}</td>
-                                        {(isDocente || isJefeCarrera) && (
-                                            <td className="px-4 py-3 text-center">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${elective.status === "Aprobado"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : elective.status === "Rechazado"
-                                                        ? "bg-red-100 text-red-800"
-                                                        : "bg-yellow-100 text-yellow-800"
-                                                    }`}>
-                                                    {elective.status}
-                                                </span>
-                                            </td>
-                                        )}
-                                        {isDocente && elective.teacherRut === user.rut && (
-                                            <td className="px-4 py-3 text-center">
-                                                <button onClick={() => handleEditElective(elective)} className="text-blue-600 hover:text-blue-800 mr-3">
-                                                    <Pencil className="h-4 w-4" />
-                                                </button>
-                                                <button onClick={() => handleDeleteElective(elective)} className="text-red-600 hover:text-red-800">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </td>
-                                        )}
-                                        {isJefeCarrera && (
-                                            <td className="px-4 py-3 text-center">
-                                                <button
-                                                    onClick={() => handleViewDetails(elective)}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                    Ver
-                                                </button>
-                                            </td>
+                    {!loading && electives.length > 0 && (isDocente || isJefeCarrera) && (
+                        <div className="w-full border border-gray-300 rounded-lg">
+                            <table className="w-full caption-bottom text-sm">
+                                <thead className="border-b border-gray-300 bg-gray-50">
+                                    <tr>
+                                        <th className="min-w-32 h-12 px-4 text-left font-medium">Nombre</th>
+                                        <th className="min-w-40 h-12 px-4 text-left font-medium">Descripción</th>
+                                        <th className="min-w-32 h-12 px-4 text-center font-medium">Horario</th>
+                                        <th className="min-w-20 h-12 px-4 text-center font-medium">Cupos</th>
+                                        <th className="min-w-20 h-12 px-4 text-center font-medium">Estado</th>
+                                        {isDocente && (
+                                            <th className="min-w-24 h-12 px-4 text-center font-medium">Acciones</th>
                                         )}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                </thead>
+                                <tbody>
+                                    {electives.map((elective) => (
+                                        <tr key={elective.id}>
+                                            <td className="px-4 py-3">{elective.name}</td>
+                                            <td className="px-4 py-3 text-gray-600 text-xs">{elective.description}</td>
+                                            <td className="px-4 py-3 text-gray-600 text-xs text-center">
+                                                <div className="flex flex-col items-center gap-1">
+                                                    {!elective.schedule || !Array.isArray(elective.schedule) || elective.schedule.length === 0 ? (
+                                                        <span className="text-gray-500 italic">No especificado</span>
+                                                    ) : (
+                                                        elective.schedule.map((entry, idx) => (
+                                                            <div key={idx} className="flex flex-col items-center">
+                                                                <span className="font-semibold text-gray-900 text-xs">
+                                                                    {entry.startTime?.substring(0, 5)} - {entry.endTime?.substring(0, 5)}
+                                                                </span>
+                                                                <span className="text-xs text-gray-600">{entry.day}</span>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center font-medium">{elective.quotas}</td>
+                                            {(isDocente || isJefeCarrera) && (
+                                                <td className="px-4 py-3 text-center">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${elective.status === "Aprobado"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : elective.status === "Rechazado"
+                                                            ? "bg-red-100 text-red-800"
+                                                            : "bg-yellow-100 text-yellow-800"
+                                                        }`}>
+                                                        {elective.status}
+                                                    </span>
+                                                </td>
+                                            )}
+                                            {isDocente && elective.teacherRut === user.rut && (
+                                                <td className="px-4 py-3 text-center">
+                                                    {elective.status === "Rechazado" && (
+                                                        <button
+                                                            onClick={() => handleViewDetails(elective)}
+                                                            className="text-indigo-600 hover:text-indigo-800 mr-3"
+                                                            title="Ver motivo de rechazo"
+                                                        >
+                                                            <Eye className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => handleEditElective(elective)} className="text-blue-600 hover:text-blue-800 mr-3">
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteElective(elective)} className="text-red-600 hover:text-red-800">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            )}
+                                            {isJefeCarrera && (
+                                                <td className="px-4 py-3 text-center">
+                                                    <button
+                                                        onClick={() => handleViewDetails(elective)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition"
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                        Ver
+                                                    </button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
 };
 
 function generateTimeOptions() {
