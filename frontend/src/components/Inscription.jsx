@@ -359,7 +359,7 @@ async function inscriptionDetailsDialog(
       '<p class="text-sm text-gray-800">' +
       '<span class="text-gray-600">Prerrequisitos: </span>' +
       '<span class="font-semibold">' +
-      elective.prerrequisites +
+      `${elective.prerrequisites || 'Ninguno'}` +
       "</span>" +
       "</p>" +
       "</div>" +

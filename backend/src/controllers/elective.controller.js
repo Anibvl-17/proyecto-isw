@@ -8,7 +8,7 @@ import {
 } from "../handlers/responseHandlers.js";
 import { electiveBodyValidation } from "../validations/elective.validation.js";
 import { changeElectiveStatusService } from "../services/elective.service.js";
-import { checkTeacherPeriod } from "../services/periodo.service.js"; 
+import { checkTeacherPeriod } from "../services/periodo.service.js";
 
 export async function getAllElectives(req, res) {
     try {
@@ -135,23 +135,32 @@ export async function updateElective(req, res) {
             return handleErrorClient(res, 403, "No tienes permiso para modificar este electivo.");
         }
 
-        if (elective.status === "Rechazado") {
+        const previousStatus = elective.status;
+
+        if (elective.status === "Rechazado" || elective.status === "Aprobado") {
             elective.status = "Pendiente";
         }
 
         Object.assign(elective, value);
         await electiveRepository.save(elective);
 
-        return res.status(200).json({
-            message: "Electivo actualizado exitosamente. " +
-                     (elective.status === "Pendiente" ? "Vuelve a estar pendiente de revisión." : ""),
-            data: elective
-        });
+        let statusMessage = "";
+
+        if (previousStatus === "Aprobado" && elective.status === "Pendiente") {
+            statusMessage = "Pendiente de revisión.";
+        } else if (previousStatus === "Rechazado" && elective.status === "Pendiente") {
+            statusMessage = "Pendiente de revisión.";
+        }
+            return res.status(200).json({
+                message: "Electivo actualizado exitosamente. " + statusMessage,
+                data: elective,
+            });
     } catch (error) {
         console.error("Error al actualizar electivo:", error);
         return handleErrorServer(res, 500, error.message);
     }
 }
+
 
 export async function deleteElective(req, res) {
     try {

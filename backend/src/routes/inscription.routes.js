@@ -8,7 +8,8 @@ import {
     getInscriptionId,
     deleteInscriptionId,
     updateStatus,
-    getElectivesByPrerequisites
+    getElectivesByPrerequisites,
+    getInscriptionsByElective
 } from "../controllers/inscription.controller.js";
 
 const router = Router();
@@ -16,6 +17,8 @@ router.use(authenticateJwt);
 
 router.get("/", verifyRoles(["docente", "alumno"]), getInscription); 
 router.get("/filter", verifyRoles(["alumno", "docente", "jefe_carrera"]), getElectivesByPrerequisites);
+router.get("/elective/:id", verifyRoles(["docente", "jefe_carrera"]), getInscriptionsByElective);
+
 router.get("/:id", verifyRoles(["alumno"]), getInscriptionId);
 
 router.post("/", verifyRoles(["alumno", "docente"]), createInscription); 

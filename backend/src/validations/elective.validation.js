@@ -10,6 +10,24 @@ const timeFormat = Joi.string()
 
 const validWeekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
+const scheduleEntrySchema = Joi.object({
+    day: Joi.string()
+    .valid(...validWeekDays)
+    .required()
+    .messages({
+        "any.only": "Día inválido. Días válidos: Lunes a Sábado",
+        "any.required": "El día es obligatorio"
+    }),
+    startTime: timeFormat.required().messages({
+        "any.required": "La hora de inicio es obligatoria",
+        "string.empty": "La hora de inicio no puede estar vacía",
+    }),
+    endTime: timeFormat.required().messages({
+        "any.required": "La hora de fin es obligatoria",
+        "string.empty": "La hora de fin no puede estar vacía",
+    }),
+});
+
 export const electiveBodyValidation = Joi.object({
     name: Joi.string().min(3).max(255).required().messages({
         "string.empty": "El nombre no puede estar vacío",
@@ -34,27 +52,18 @@ export const electiveBodyValidation = Joi.object({
         "string.max": "Los prerrequisitos no pueden exceder los 500 caracteres"
 
     }),
-    startTime: timeFormat.required().messages({
-        "any.required": "La hora de inicio es obligatoria",
-        "string.empty": "La hora de inicio no puede estar vacía",
-    }),
-    endTime: timeFormat.required().messages({
-        "any.required": "La hora de fin es obligatoria",
-        "string.empty": "La hora de fin no puede estar vacía",
-    }),
-    weekDays: Joi.array()
-        .items(Joi.string().valid(...validWeekDays))
+    schedule: Joi.array()
+        .items(scheduleEntrySchema)
         .min(1)
-        .max(6)
-        .unique()
+        .max(3)
+        .unique((a, b) => a.day === b.day)
         .required()
         .messages({
-            "array.base": "Los días de la semana deben ser un arreglo",
-            "array.min": "Debe seleccionar al menos 1 día de la semana",
-            "array.max": "No puede seleccionar más de 6 días",
-            "any.only": "Día de la semana inválido. Días válidos: Lunes a Sábado",
-            "array.unique": "No puede repetir días de la semana",
-            "any.required": "Los días de la semana son obligatorios",
+            "array.base": "El horario debe ser un arreglo",
+            "array.min": "Debe seleccionar al menos 1 día de clase",
+            "array.max": "No puede seleccionar más de 3 días de clases",
+            "array.unique": "No puede repetir el mismo día",
+            "any.required": "El horario es obligatorio",
         }),
     quotas: Joi.number().integer().min(1).max(200).required().messages({
         "number.base": "Los cupos deben ser un número",
@@ -65,19 +74,20 @@ export const electiveBodyValidation = Joi.object({
     }),
 })
     .custom((value, helpers) => {
-        if (value.startTime && value.endTime) {
-            const [startHour, startMin] = value.startTime.split(":").map(Number);
-            const [endHour, endMin] = value.endTime.split(":").map(Number);
+        if (value.schedule && Array.isArray(value.schedule)) {
+            for (const entry of value.schedule) {
+                const [startHour, startMin] = entry.startTime.split(":").map(Number);
+                const [endHour, endMin] = entry.endTime.split(":").map(Number);
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
 
-            const startMinutes = startHour * 60 + startMin;
-            const endMinutes = endHour * 60 + endMin;
+                if (endMinutes <= startMinutes) {
+                    return helpers.error("custom.endTimeBeforeStart", { day: entry.day });
+                }
 
-            if (endMinutes <= startMinutes) {
-                return helpers.error("custom.endTimeBeforeStart");
-            }
-
-            if (endMinutes - startMinutes < 30) {
-                return helpers.error("custom.minimumDuration");
+                if (endMinutes - startMinutes < 30) {
+                    return helpers.error("custom.minimumDuration", { day: entry.day });
+                }
             }
         }
 

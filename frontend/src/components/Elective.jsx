@@ -74,19 +74,19 @@ export function Elective({
   };
 
   const formatSchedule = () => {
-    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
+    if (!elective.schedule || !Array.isArray(elective.schedule) ||
+      elective.schedule.length === 0) {
       return "No especificado";
     }
 
-    const days = Array.isArray(elective.weekDays)
-      ? elective.weekDays.join(", ")
-      : elective.weekDays;
-
-    return `${elective.startTime.substring(0, 5)} - ${elective.endTime.substring(0, 5)} (${days})`;
+    return elective.schedule
+      .map(entry => `${entry.day} ${entry.startTime.substring(0, 5)}-${entry.endTime.substring(0, 5)}`)
+      .join(", ");
   };
 
   const formatScheduleTable = () => {
-    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
+    if (!elective.schedule || !Array.isArray(elective.schedule) ||
+      elective.schedule.length === 0) {
       return <span className="text-gray-500 text-xs italic">No especificado</span>;
     }
 
@@ -99,20 +99,16 @@ export function Elective({
       Sábado: "Sáb",
     };
 
-    const daysArray = Array.isArray(elective.weekDays)
-      ? elective.weekDays
-      : [elective.weekDays];
-
-    const daysShort = daysArray
-      .map((day) => dayAbbrevs[day] || day)
-      .join(" - ");
-
     return (
-      <div className="flex flex-col items-center gap-0.5">
-        <span className="font-semibold text-gray-900 text-sm">
-          {elective.startTime} - {elective.endTime}
-        </span>
-        <span className="text-xs text-gray-600">{daysShort}</span>
+      <div className="flex flex-col items-center gap-1">
+        {elective.schedule.map((entry, index) => (
+          <div key={index} className="flex flex-col items-center">
+            <span className="font-semibold text-gray-900 text-xs">
+              {entry.startTime.substring(0, 5)} - {entry.endTime.substring(0, 5)}
+            </span>
+            <span className="text-xs text-gray-600">{dayAbbrevs[entry.day] || entry.day}</span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -126,7 +122,7 @@ export function Elective({
 
     if (availableQuotas > 0) {
       return { text: "Disponible", color: "bg-green-100 text-green-700" };
-    } else{
+    } else {
       return { text: "Sin cupos", color: "bg-red-100 text-red-700" };
     }
   };
@@ -191,17 +187,17 @@ export function Elective({
   };
 
   const getMyInscriptions = async () => {
-  if (!isAlumno) return;
+    if (!isAlumno) return;
 
-  try {
-    const res = await getInscription();
+    try {
+      const res = await getInscription();
 
-    if (res.success) {
-      setMyInscriptions(res.data || []);
+      if (res.success) {
+        setMyInscriptions(res.data || []);
+      }
+    } catch (error) {
+      console.error("Error al obtener inscripciones", error);
     }
-  } catch (error) {
-    console.error("Error al obtener inscripciones", error);
-  }
   };
 
   useEffect(() => {
@@ -347,7 +343,7 @@ export function Elective({
         </td>
 
         <td className="px-4 py-3 align-middle">
-            {formatScheduleTable()}
+          {formatScheduleTable()}
         </td>
 
         <td className="px-4 py-3 align-middle text-center">
@@ -430,13 +426,13 @@ export function Elective({
 async function electiveDetailsDialog(elective) {
 
   const formatSchedule = () => {
-    if (!elective.startTime || !elective.endTime || !elective.weekDays) {
-      return "No especificado";
+    if (elective.schedule && Array.isArray(elective.schedule) &&
+      elective.schedule.length > 0) {
+      return elective.schedule
+        .map(entry => `${entry.day} ${entry.startTime?.substring(0, 5)}-${entry.endTime?.substring(0, 5)}`)
+        .join(", ");
     }
-    const days = Array.isArray(elective.weekDays)
-      ? elective.weekDays.join(", ")
-      : elective.weekDays;
-    return `${elective.startTime.substring(0, 5)} - ${elective.endTime.substring(0, 5)} (${days})`;
+    return "No especificado";
   };
 
   await Swal.fire({
@@ -492,13 +488,13 @@ async function electiveDetailsDialog(elective) {
       '<div class="p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg">' +
       (elective.prerrequisites && elective.prerrequisites.trim() !== ""
         ? '<div class="flex flex-wrap gap-2">' +
-          elective.prerrequisites
-            .split(",")
-            .map(
-              (prereq) =>
-                '<span class="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-medium">' +
-                prereq.trim() +
-                "</span>"
+        elective.prerrequisites
+          .split(",")
+          .map(
+            (prereq) =>
+              '<span class="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-medium">' +
+              prereq.trim() +
+              "</span>"
           )
           .join("") +
         "</div>"
