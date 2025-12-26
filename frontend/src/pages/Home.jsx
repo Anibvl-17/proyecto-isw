@@ -64,7 +64,7 @@ const Home = () => {
     });
   };
 
-  const getHomeDescription = () => {
+  const getDescriptionText = () => {
     if (isAlumno) {
       return "Gestiona tus inscripciones y solicitudes desde aquí";
     } else if (isDocente) {
@@ -87,7 +87,7 @@ const Home = () => {
             <div className="flex flex-col gap-2">
               <h1 className="font-bold text-2xl">Inicio</h1>
               <p className="text-gray-600">
-                {getHomeDescription()}
+                {getDescriptionText()}
               </p>
             </div>
           </div>
