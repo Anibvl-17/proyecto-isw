@@ -1,10 +1,10 @@
 import { ArrowRight } from "lucide-react";
 
-function HomeCard({ icon, counter, text, color, btnText, onClick }) {
+function HomeCard({ icon, counter, text, color, btnText, onClick, flexOne = true }) {
   const Icon = icon;
   return (
     <div
-      className={`flex flex-row flex-1 gap-4 justify-between items-center px-4 py-6 border border-gray-200 rounded-lg transition-all shadow-sm hover:shadow-md hover:border-${color}-500`}
+      className={`flex flex-row ${flexOne? "flex-1" : ""} gap-4 justify-between items-center px-4 py-6 border border-gray-200 rounded-lg transition-all shadow-sm hover:shadow-md hover:border-${color}-500`}
     >
       <span className={`bg-${color}-100 p-2.5 rounded-full`}>
         <Icon className={`text-${color}-700 h-5 w-5`} />
