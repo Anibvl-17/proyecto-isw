@@ -163,7 +163,7 @@ const Home = () => {
                     <HomeCard
                       icon={MessageSquareText}
                       counter={requestCounter}
-                      text="solicitudes pendientes"
+                      text={requestCounter === 1 ? "solicitud disponible" : "solicitudes disponibles"}
                       color="sky"
                       btnText="Ir a solicitudes"
                       onClick={() => navigate("/requests")}
@@ -171,7 +171,7 @@ const Home = () => {
                     <HomeCard
                       icon={GraduationCap}
                       counter={electiveCounter}
-                      text="electivos disponibles"
+                      text={electiveCounter === 1 ? "electivo disponible" : "electivos disponibles"}
                       color="blue"
                       btnText="Ir a electivos"
                       onClick={() => navigate("/electives")}
@@ -179,7 +179,7 @@ const Home = () => {
                     <HomeCard
                       icon={FilePenLine}
                       counter={inscriptionCounter}
-                      text="inscripciones activas"
+                      text={inscriptionCounter === 1 ? "inscripción disponible" : "inscripciones disponibles"}
                       color="purple"
                       btnText="Ir a inscripciones"
                       onClick={() => navigate("/inscription")}
