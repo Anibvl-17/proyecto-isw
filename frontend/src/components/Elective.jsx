@@ -115,7 +115,7 @@ export function Elective({
 
   const getAvailabilityBadge = (isAlreadyInscribed) => {
     if (isAlreadyInscribed) {
-      return { text: "Inscrito", color: "bg-blue-100 text-blue-700" };
+      return { text: "Postulado", color: "bg-blue-100 text-blue-700" };
     }
 
     const availableQuotas = Elective?.quotas ?? 0;
