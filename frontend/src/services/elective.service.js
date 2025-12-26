@@ -83,13 +83,13 @@ export async function deleteElective(id) {
   }
 }
 
-export async function changeElectiveStatus(id, status) {
+export async function changeElectiveStatus(id, payload) {
   try {
-    const response = await axios.patch(`/electives/${id}/status`, { status });
+    const { data } = await axios.patch(`/electives/status/${id}`, payload);
     return {
       success: true,
-      data: response.data.data,
-      message: response.data.message || `Electivo ${status === "Aprobado" ? "aprobado" : "rechazado"} exitosamente`,
+      data: data.data,
+      message: data.message 
     };
   } catch (error) {
     console.error("Error en changeElectiveStatus():", error);
