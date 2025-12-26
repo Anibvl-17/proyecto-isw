@@ -38,7 +38,7 @@ export async function updateElectiveService(id, data) {
     const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
     const elective = await getElectiveByIdService(id);
 
-    if (elective.status === "Rechazado") {
+    if (elective.status === "Rechazado" || elective.status === "Aprobado") {
         data.status = "Pendiente";
     }
 
