@@ -33,17 +33,10 @@ export const ElectiveEntity = new EntitySchema({
             type: "text",
             nullable: true,
         },
-        startTime: {
-            type: "time",
-            nullable: false,
-        },
-        endTime: {
-            type: "time",
-            nullable: false,
-        },
-        weekDays: {
+        schedule: {
             type: "simple-json",
             nullable: false,
+            comment: "Array de objetos -> [{day: 'Lunes', startTime: '08:00', endTime: '10:00'}]"
         },
         quotas: {
             type: "int",
