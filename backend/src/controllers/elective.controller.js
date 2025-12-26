@@ -1,6 +1,7 @@
 "use strict";
 
 import { ElectiveEntity } from "../entities/elective.entity.js";
+import { Inscription } from "../entities/inscription.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 import {
     handleErrorClient,
@@ -180,6 +181,21 @@ export async function deleteElective(req, res) {
 
         if (elective.teacherRut !== req.user.rut && !["jefe_carrera", "administrador"].includes(req.user.role)) {
             return handleErrorClient(res, 403, "No tienes permiso para eliminar este electivo.");
+        }
+
+        const inscriptionRepository = AppDataSource.getRepository(Inscription);
+        const approvedInscriptions = await inscriptionRepository.find({
+            where: {
+                electiveId: parseInt(id),
+                estado: "aprobado"
+            }
+        });
+
+        if (approvedInscriptions.length > 0) {
+            return handleErrorClient(
+                res, 
+                400, 
+                "No se puede eliminar el electivo porque tiene alumnos inscritos.");
         }
 
         await electiveRepository.delete({ id: parseInt(id) });
