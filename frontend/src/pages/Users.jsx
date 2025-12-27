@@ -33,13 +33,20 @@ const Users = () => {
     return dateObject.toLocaleString();
   };
 
+  const roleText = {
+    alumno: "Alumno",
+    docente: "Docente",
+    administrador: "Administrador",
+    jefe_carrera: "Jefe de Carrera",
+  };
+
   const handleAddUser = async () => {
     try {
       const formValues = await addUserDialog();
       if (!formValues) return;
 
       const registerResponse = await register(formValues);
-      
+
       if (registerResponse.success) {
         Swal.fire({
           toast: true,
@@ -95,21 +102,13 @@ const Users = () => {
             <table className="w-full caption-bottom text-sm overflow-x-scroll">
               <thead className="border-b border-gray-300">
                 <tr>
-                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
-                    ID
-                  </th>
+                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">ID</th>
                   <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
                     Nombre de usuario
                   </th>
-                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
-                    Email
-                  </th>
-                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
-                    RUT
-                  </th>
-                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
-                    Rol
-                  </th>
+                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">Email</th>
+                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">RUT</th>
+                  <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">Rol</th>
                   <th className="min-w-10 h-12 px-4 text-left align-middle font-medium">
                     Fecha creación
                   </th>
@@ -138,7 +137,7 @@ const Users = () => {
                       <td className="min-w-28 p-4 align-middle">{user.username}</td>
                       <td className="min-w-40 p-4 align-middle">{user.email}</td>
                       <td className="min-w-28 p-4 align-middle">{user.rut}</td>
-                      <td className="min-w-28 p-4 align-middle">{user.role}</td>
+                      <td className="min-w-28 p-4 align-middle">{roleText[user.role]}</td>
                       <td className="min-w-28 p-4 align-middle">
                         {dateFormatter(user.created_at)}
                       </td>
@@ -146,12 +145,16 @@ const Users = () => {
                         {dateFormatter(user.updated_at)}
                       </td>
                       <td className="min-w-16 p-4 flex flex-row justify-center items-center gap-2">
-                        <button className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
-                          <Edit2 className="text-blue-700 h-5 w-5" />
-                        </button>
-                        <button className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
-                          <Trash2 className="text-red-700 h-5 w-5" />
-                        </button>
+                        {user.role !== "administrador" ? (
+                          <>
+                            <button className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
+                              <Edit2 className="text-blue-700 h-5 w-5" />
+                            </button>
+                            <button className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
+                              <Trash2 className="text-red-700 h-5 w-5" />
+                            </button>
+                          </>
+                        ) : <span className="text-sm text-gray-600 italic">No disponible</span>}
                       </td>
                     </tr>
                   ))
@@ -232,16 +235,12 @@ async function addUserDialog() {
       }
 
       if (username.length < 2 || username.length > 75) {
-        Swal.showValidationMessage(
-          "El nombre de usuario debe tener entre 2 y 75 caracteres"
-        );
+        Swal.showValidationMessage("El nombre de usuario debe tener entre 2 y 75 caracteres");
         return false;
       }
 
       if (!usernameRegex.test(username)) {
-        Swal.showValidationMessage(
-          "Solo se permiten letras y espacios en el nombre de usuario"
-        );
+        Swal.showValidationMessage("Solo se permiten letras y espacios en el nombre de usuario");
         return false;
       }
 
