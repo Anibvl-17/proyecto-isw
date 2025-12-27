@@ -160,7 +160,7 @@ const Home = () => {
                       ))
                     ) : (
                       <>
-                        <p className="text-md font-medium text-gray-700">Estado inscripción</p>
+                        <p className="text-md font-medium text-gray-700">Estado</p>
                         <p className="text-lg font-semibold text-gray-500 italic">
                           Sin periodos activos
                         </p>
