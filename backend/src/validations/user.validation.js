@@ -18,6 +18,10 @@ export const editUserBodyValidation = Joi.object({
     "string.empty": "El email no puede estar vacío",
     "any.required": "El email es obligatorio",
   }),
+  password: Joi.string().min(6).messages({
+    "string.min": "La contraseña debe tener al menos 6 caracteres",
+    "string.empty": "La contraseña no puede estar vacía",
+  }),
   rut: Joi.string()
     .pattern(/^\d{7,8}-[\dkK]$/)
     .messages({

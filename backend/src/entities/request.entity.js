@@ -56,5 +56,23 @@ export const Request = new EntitySchema({
       updateDate: true,
       default: () => "CURRENT_TIMESTAMP"
     }
+  },
+  relations: {
+    studentId: {
+      type: "many-to-one",
+      target: "User",
+      joinColumn: {
+        name: "userId",
+      },
+      onDelete: "CASCADE",
+    },
+    reviewerId: {
+      type: "many-to-one",
+      target: "User",
+      joinColumn: {
+        name: "reviewerId",
+      },
+      onDelete: "SET NULL",
+    }
   }
 });

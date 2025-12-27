@@ -92,7 +92,7 @@ const Home = () => {
     } else if (isJefeCarrera) {
       return "Revisa los períodos, las solicitudes excepcionales y los electivos";
     } else if (isAdmin) {
-      return "Revisa los usuarios y períodos del sistema";
+      return "Revisa los usuarios sistema";
     }
   };
 

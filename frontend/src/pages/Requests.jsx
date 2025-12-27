@@ -116,7 +116,7 @@ const Requests = () => {
               <p className="text-gray-600">
                 {isAlumno
                   ? "Solicita inscripciones excepcionales fuera del período, en electivos sin cupos o con pre-requisitos pendientes."
-                  : "Revisa y responde las solicitudes de inscripción excepcionales"}
+                  : "Revisa y responde las solicitudes de inscripción excepcionales. Haz click en las etiquetas para filtrar las solicitudes."}
               </p>
             </div>
             {isAlumno && (

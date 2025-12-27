@@ -1,5 +1,6 @@
 import { AppDataSource } from "../config/configDb.js";
 import { User } from "../entities/user.entity.js";
+import bcrypt from "bcrypt";
 
 export async function getUsersService() {
   const userRepository = AppDataSource.getRepository(User);
@@ -24,7 +25,8 @@ export async function getUserByIdService(id) {
 
 export async function editUserService(id, data) {
   const userRepository = AppDataSource.getRepository(User);
-  const { username, email, rut, role } = data;
+  const { username, email, password, rut, role } = data;
+  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await userRepository.findOne({
     where: { id },
   });
@@ -35,6 +37,7 @@ export async function editUserService(id, data) {
 
   if (username) user.username = username;
   if (email) user.email = email;
+  if (password) user.password = hashedPassword;
   if (rut) user.rut = rut;
   if (role) user.role = role;
 
