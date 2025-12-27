@@ -101,8 +101,8 @@ const Profile = () => {
               {/* Carrera solo alumno y jefe carrera */}
               {(isAlumno || isJefeCarrera) && (
                 <div className="flex flex-row items-center gap-2 border-b border-b-gray-300 py-3">
-                  <span className="bg-purple-100 rounded-sm p-2">
-                    <BookTextIcon className="text-purple-600 h-5 w-5" />
+                  <span className="bg-blue-100 rounded-sm p-2">
+                    <BookTextIcon className="text-blue-600 h-5 w-5" />
                   </span>
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Carrera</span>
@@ -114,8 +114,8 @@ const Profile = () => {
               {/* Electivos inscritos solo alumno*/}
               {isAlumno && (
                 <div className="flex flex-row items-center gap-2 py-3">
-                  <span className="bg-purple-100 rounded-sm p-2">
-                    <GraduationCap className="text-purple-600 h-5 w-5" />
+                  <span className="bg-blue-100 rounded-sm p-2">
+                    <GraduationCap className="text-blue-600 h-5 w-5" />
                   </span>
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Electivos inscritos</span>
@@ -127,8 +127,8 @@ const Profile = () => {
               {/* Electivos creados solo docente */}
               {isDocente && (
                 <div className="flex flex-row items-center gap-2 py-3">
-                  <span className="bg-purple-100 rounded-sm p-2">
-                    <GraduationCap className="text-purple-600 h-5 w-5" />
+                  <span className="bg-blue-100 rounded-sm p-2">
+                    <GraduationCap className="text-blue-600 h-5 w-5" />
                   </span>
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Electivos creados</span>
