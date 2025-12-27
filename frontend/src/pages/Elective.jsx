@@ -693,9 +693,9 @@ async function reviewCommentDialog() {
                 Swal.showValidationMessage("El comentario es obligatorio");
                 return false;
             }
-            if (reviewComment.length < 10 || reviewComment.length > 500) {
+            if (reviewComment.length < 5 || reviewComment.length > 300) {
                 Swal.showValidationMessage(
-                    "El comentario debe contener entre 10 y 500 caracteres"
+                    "El comentario debe contener entre 5 y 300 caracteres"
                 );
                 return false;
             }
