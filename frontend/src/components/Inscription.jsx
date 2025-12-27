@@ -183,7 +183,7 @@ export function Inscription({
         )}
 
         {inscription.motivo_rechazo && (
-          <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
+          <div className="mt-2 p-3 rounded-md border border-red-400 bg-red-50 text-red-700 line-clamp-2 break-all overflow-hidden">
             <strong>Motivo rechazo:</strong> {inscription.motivo_rechazo}
           </div>
         )}
@@ -248,12 +248,13 @@ export function Inscription({
 
       {/* Motivo de rechazo (si hay) */}
       <td className="min-w-8 p-4 align-middle">
-        {inscription.motivo_rechazo ? (
-          <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
-            <strong>Motivo:</strong> {inscription.motivo_rechazo}
+        {inscription.motivo_rechazo && (
+          <div className="text-sm text-red-600 bg-red-50 p-2 rounded-md border border-red-400 max-w-xs">
+            <strong>Motivo:</strong>
+            <p className="line-clamp-1 overflow-hidden text-ellipsis break-all">
+              {inscription.motivo_rechazo}
+            </p>
           </div>
-        ) : (
-          ""
         )}
       </td>
 

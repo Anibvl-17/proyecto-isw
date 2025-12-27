@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { createInscription, getInscription } from "@services/inscription.service";
 import { getElectiveById } from "@services/elective.service";
 import Swal from "sweetalert2";
+import socket from "@services/socket.service";
 
 export function Elective({
   elective,
@@ -19,7 +20,6 @@ export function Elective({
 
   const [Elective, setElective] = useState(elective);
   const [myInscriptions, setMyInscriptions] = useState([]);
-  const refreshIntervalMs = 5000; // Actualizar cupos cada 5 segundos
 
   const isAlumno = user.role === "alumno";
   const isDocente = user.role === "docente";
@@ -29,28 +29,20 @@ export function Elective({
   const isOwner = isDocente && elective.teacherRut === user.rut;
 
   useEffect(() => {
-    let refresh = true;
+    if (!elective?.id) return;
 
-    setElective(elective);
-
-    const fetchData = async () => {
-      try {
-        if (!elective?.id) return;
-        const res = await getElectiveById(elective.id);
-        if (res?.success && refresh) {
-          setElective(res.data);
-        }
-      } catch (error) {
+    const onQuotaUpdate = ({ electiveId, quotas }) => {
+      if (electiveId === Elective.id) {
+        setElective((prev) => ({ ...prev, quotas, }));
       }
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, refreshIntervalMs);
+    socket.on("elective:quotaUpdated", onQuotaUpdate);
 
     return () => {
-      refresh = false;
-      clearInterval(interval);
+      socket.off("elective:quotaUpdated", onQuotaUpdate);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elective?.id]);
 
   const getBadgeType = () => {

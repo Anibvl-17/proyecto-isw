@@ -9,6 +9,7 @@ import { getElectivesService } from "../services/elective.service.js";
 import jwt from "jsonwebtoken";
 // 1. IMPORTAMOS LA VALIDACIÓN DEL PERIODO
 import { checkInscriptionPeriod } from "../services/periodo.service.js";
+import { getIO } from "../socket.js";
 
 export async function createInscription(req, res){
     try {
@@ -35,6 +36,13 @@ export async function createInscription(req, res){
         if(hasInscription) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
 
         const newInscription = await createInscriptionService(data);
+
+        // Emitir evento en tiempo real
+        const io = getIO();
+        io.emit("elective-quota-updated", {
+            electiveId: data.electiveId
+        });
+
         handleSuccess(res, 201, "Inscripcion creada exitosamente", newInscription);
     } catch (error) {
         handleErrorServer(res, 500, "Error al crear la solicitud", error.message);
