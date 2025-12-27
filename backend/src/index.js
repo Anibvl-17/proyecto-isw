@@ -4,7 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import { connectDb } from "./config/configDb.js";
 import { routerApi } from "./routes/index.routes.js";
-import { createInitialUsers } from "./config/initDb.js";
+import { createInitialElectives, createInitialPeriodo, createInitialUsers } from "./config/initDb.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { initSocket } from "./socket.js";
@@ -43,6 +43,8 @@ connectDb()
     routerApi(app);
 
     createInitialUsers();
+    createInitialPeriodo();
+    createInitialElectives();
 
     // Levanta el servidor
     const PORT = process.env.PORT || 3000;
