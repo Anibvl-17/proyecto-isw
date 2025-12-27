@@ -42,7 +42,7 @@ export async function deletePeriodoService(id) {
   return { message: "Período eliminado exitosamente" };
 }
 
-// Verificar si hay período activo para ALUMNOS
+// Verificar si hay periodo activo para ALUMNOS
 export async function checkInscriptionPeriod() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
@@ -51,14 +51,14 @@ export async function checkInscriptionPeriod() {
     where: {
       fechaInicio: LessThanOrEqual(now),
       fechaCierre: MoreThanOrEqual(now),
-      visibilidad: In(["alumnos", "todos"]),
+      visibilidad: "alumnos", 
     },
   });
 
   return !!periodoActivo;
 }
 
-// Verificar si hay período activo para DOCENTES
+// Verificar si hay periodo activo para DOCENTES 
 export async function checkTeacherPeriod() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
@@ -67,27 +67,30 @@ export async function checkTeacherPeriod() {
     where: {
       fechaInicio: LessThanOrEqual(now),
       fechaCierre: MoreThanOrEqual(now),
-      visibilidad: In(["docentes", "todos"]),
+      visibilidad: "docentes", 
     },
   });
 
   return !!periodoActivo;
 }
 
-// NUEVA Y CORREGIDA: Obtiene TODOS los periodos activos para el rol
+// Obtiene TODOS los periodos activos para el rol (Para el Home)
 export async function getActivePeriodForRoleService(role) {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
 
-  let visibilidadArray = ["todos"];
+  let visibilidadArray = [];
 
   if (role === "alumno") {
     visibilidadArray.push("alumnos");
   } else if (role === "docente") {
     visibilidadArray.push("docentes");
   } else if (role === "jefe_carrera" || role === "administrador") {
-    visibilidadArray = ["todos", "alumnos", "docentes", "oculto"];
+    visibilidadArray = ["alumnos", "docentes"];
   }
+
+  // Si no hay rol válido o array vacío, retornamos vacío
+  if (visibilidadArray.length === 0) return [];
 
   const periodosActivos = await periodoRepository.find({
     where: {
@@ -95,8 +98,8 @@ export async function getActivePeriodForRoleService(role) {
       fechaCierre: MoreThanOrEqual(now),
       visibilidad: In(visibilidadArray),
     },
-    order: { fechaCierre: "ASC" }, // El que termina antes primero
+    order: { fechaCierre: "ASC" },
   });
 
-  return periodosActivos; // Array (puede tener 0, 1 o más elementos)
+  return periodosActivos;
 }

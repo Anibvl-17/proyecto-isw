@@ -21,34 +21,22 @@ export const periodoBodyValidation = Joi.object({
 
   fechaCierre: Joi.date()
     .iso()
-    .greater(Joi.ref("fechaInicio")) 
+    .greater(Joi.ref("fechaInicio"))
     .required()
     .messages({
       "date.greater": "La fecha de cierre debe ser posterior a la fecha de inicio.",
       "any.required": "La fecha de cierre es obligatoria.",
     }),
 
-  restriccionAño: Joi.number()
-    .integer()
-    .min(1)
-    .max(6)
-    .optional()
-    .allow(null)
-    .messages({
-      "number.base": "La restricción de año debe ser un número entero.",
-      "number.min": "El año mínimo es 1.",
-      "number.max": "El año máximo es 6.",
-    }),
-
   visibilidad: Joi.string()
-    .valid("oculto", "alumnos", "docentes", "todos")
-    .default("oculto") 
-    .optional()
+    .valid("alumnos", "docentes") 
+    .required()
     .messages({
-      "any.only": "La visibilidad debe ser: 'oculto', 'alumnos', 'docentes' o 'todos'.",
+      "any.only": "La visibilidad debe ser: 'alumnos' o 'docentes'.",
+      "any.required": "La visibilidad es obligatoria.",
     }),
 })
-  .unknown(false)
+  .unknown(true) 
   .messages({
-    "object.unknown": "No se permiten propiedades adicionales en el cuerpo de la solicitud.",
+    "object.unknown": "No se permiten propiedades adicionales.",
   });

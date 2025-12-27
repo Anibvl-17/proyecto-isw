@@ -65,15 +65,11 @@ const Periodos = () => {
             <input type="datetime-local" id="fechaCierre" class="swal2-input m-0" value="${formatForInput(periodoToEdit?.fechaCierre)}">
           </div>
           
-          <!-- SE ELIMINÓ RESTRICCIÓN AÑO AQUÍ -->
-
           <div>
-            <label class="text-sm font-medium">Visibilidad</label>
+            <label class="text-sm font-medium">¿Para quién es el periodo?</label>
             <select id="visibilidad" class="swal2-select m-0">
-              <option value="oculto" ${periodoToEdit?.visibilidad === 'oculto' || !periodoToEdit ? 'selected' : ''}>Oculto (nadie)</option>
               <option value="alumnos" ${periodoToEdit?.visibilidad === 'alumnos' ? 'selected' : ''}>Solo Alumnos</option>
               <option value="docentes" ${periodoToEdit?.visibilidad === 'docentes' ? 'selected' : ''}>Solo Docentes</option>
-              <option value="todos" ${periodoToEdit?.visibilidad === 'todos' ? 'selected' : ''}>Todos</option>
             </select>
           </div>
         </div>
@@ -101,7 +97,8 @@ const Periodos = () => {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionAño: null, 
+          restriccionCarreras: null, 
+          restriccionAño: null,
           visibilidad,
         };
       },
@@ -148,7 +145,7 @@ const Periodos = () => {
 
   const renderVisibilidadBadge = (visibilidad) => {
     switch (visibilidad) {
-      case "todos":
+      case "todos": 
         return <span className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
       case "alumnos":
         return <span className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
