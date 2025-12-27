@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Edit2, Trash2, UserPlus } from "lucide-react";
-import { getUsers, editUser } from "@services/user.service";
+import { getUsers, editUser, deleteUser } from "@services/user.service";
 import { register } from "@services/auth.service";
-import { showErrorAlert } from "@helpers/sweetAlert";
+import { showErrorAlert, showConfirmAlert, showSuccessToast } from "@helpers/sweetAlert";
 import Swal from "sweetalert2";
 
 const Users = () => {
@@ -106,8 +106,23 @@ const Users = () => {
     } catch (error) {
       console.error("Error al editar usuario:", error);
       showErrorAlert("Error", "No se pudo editar el usuario");
-    }
-    
+    } 
+  }
+
+  const handleDeleteUser = async (id) => {
+    await showConfirmAlert("Eliminar usuario", "¿Está seguro que desea eliminar al usuario?", "Eliminar", async () => {
+      try {
+        const deleteResponse = await deleteUser(id);
+        
+        if (deleteResponse.success) {
+          showSuccessToast("Usuario eliminado exitosamente");
+          await fetchUsers();
+        }
+      } catch (error) {
+        console.error("Error al eliminar usuario: ", error);
+        showErrorAlert("Error", "No se pudo eliminar el usuario");
+      }
+    });
   }
 
   return (
@@ -186,7 +201,7 @@ const Users = () => {
                             <button onClick={() => handleEditUser(user)} className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
                               <Edit2 className="text-blue-700 h-5 w-5" />
                             </button>
-                            <button className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
+                            <button onClick={() => handleDeleteUser(user.id)} className="rounded-4xl p-2 transition-all hover:bg-gray-300/50 active:bg-gray-300">
                               <Trash2 className="text-red-700 h-5 w-5" />
                             </button>
                           </>

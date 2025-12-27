@@ -50,3 +50,22 @@ export async function editUser(id, data) {
     }
   }
 }
+
+export async function deleteUser(id) {
+  try {
+    const response = await axios.delete(`/users/${id}`);
+
+    if (response) {
+      return {
+        success: true,
+        message: "Electivo eliminado exitosamente"
+      }
+    }
+  } catch (error) {
+    console.error("Error en el servicio de eliminar usuario:", error.response?.data);
+    return {
+      success: false,
+      message: error.response?.data?.message || "Error al conectar con el servidor"
+    }
+  }
+}
