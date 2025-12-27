@@ -125,7 +125,7 @@ const Home = () => {
                   </p>
                 </div>
 
-                <div className="flex flex-row gap-4 w-full">
+                <div className="flex flex-row gap-4 w-full flex-wrap">
                   {/* CARD 1 solo para alumno */}
                   {isAlumno && (
                     <div className="rounded-lg bg-sky-100 p-4 flex-1">
@@ -177,7 +177,7 @@ const Home = () => {
               </div>
 
               {/* Cards */}
-              <div className="flex flex-row gap-6">
+              <div className="flex flex-row gap-6 flex-wrap">
                 {isAlumno && (
                   <>
                     <HomeCard

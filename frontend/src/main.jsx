@@ -12,6 +12,7 @@ import Users from '@pages/Users'
 import Requests from './pages/Requests'
 import Electives from '@pages/elective'
 import Periodos from '@pages/Periodos'
+import Profile from '@pages/Profile'
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Inscription />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "/profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         )
       }

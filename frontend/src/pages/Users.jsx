@@ -77,8 +77,8 @@ const Users = () => {
         <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-5 flex flex-col gap-6">
           {/* Titulo, descripción y boton de agregar usuario */}
           <div className="flex flex-row flex-1 justify-between items-center">
-            <div>
-              <h1 className="font-bold">Usuarios</h1>
+            <div className="flex flex-col gap-1">
+              <h1 className="font-bold text-2xl">Usuarios</h1>
               <p className="text-gray-500">Administra los usuarios del sistema</p>
             </div>
             <button
