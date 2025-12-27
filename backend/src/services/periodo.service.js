@@ -1,6 +1,7 @@
 import { AppDataSource } from "../config/configDb.js";
 import { Periodo } from "../entities/periodo.entity.js";
-import { LessThanOrEqual, MoreThanOrEqual, In } from "typeorm";
+// Agregamos 'Not' a los imports
+import { LessThanOrEqual, MoreThanOrEqual, In, Not } from "typeorm";
 
 // Crear un nuevo periodo
 export async function createPeriodoService(data) {
@@ -42,6 +43,27 @@ export async function deletePeriodoService(id) {
   return { message: "Período eliminado exitosamente" };
 }
 
+// Verificar solapamiento de fechas 
+export async function checkPeriodOverlapService(startDate, endDate, visibility, excludeId = null) {
+    const periodoRepository = AppDataSource.getRepository(Periodo);
+    
+    const whereClause = {
+        visibilidad: visibility, 
+        fechaInicio: LessThanOrEqual(endDate),
+        fechaCierre: MoreThanOrEqual(startDate)
+    };
+
+    if (excludeId) {
+        whereClause.id = Not(parseInt(excludeId));
+    }
+
+    const overlappingPeriod = await periodoRepository.findOne({
+        where: whereClause
+    });
+
+    return overlappingPeriod; 
+}
+
 // Verificar si hay periodo activo para ALUMNOS
 export async function checkInscriptionPeriod() {
   const periodoRepository = AppDataSource.getRepository(Periodo);
@@ -74,7 +96,7 @@ export async function checkTeacherPeriod() {
   return !!periodoActivo;
 }
 
-// Obtiene TODOS los periodos activos para el rol (Para el Home)
+// Obtiene TODOS los periodos activos para el rol
 export async function getActivePeriodForRoleService(role) {
   const periodoRepository = AppDataSource.getRepository(Periodo);
   const now = new Date();
@@ -89,7 +111,6 @@ export async function getActivePeriodForRoleService(role) {
     visibilidadArray = ["alumnos", "docentes"];
   }
 
-  // Si no hay rol válido o array vacío, retornamos vacío
   if (visibilidadArray.length === 0) return [];
 
   const periodosActivos = await periodoRepository.find({

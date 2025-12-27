@@ -7,13 +7,27 @@ import { periodoBodyValidation } from "../validations/periodo.validation.js";
 export async function createPeriodo(req, res) {
   try {
     const { body } = req;
-    const { error } = periodoBodyValidation.validate(body);
+    const { error, value } = periodoBodyValidation.validate(body);
 
     if (error) {
       return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
     }
 
-    const nuevoPeriodo = await periodoService.createPeriodoService(body);
+    const overlap = await periodoService.checkPeriodOverlapService(
+        value.fechaInicio,
+        value.fechaCierre,
+        value.visibilidad
+    );
+
+    if (overlap) {
+        return handleErrorClient(
+            res, 
+            400, 
+            "Ya existe un periodo activo en esas fechas"
+        );
+    }
+
+    const nuevoPeriodo = await periodoService.createPeriodoService(value);
     handleSuccess(res, 201, "Período creado exitosamente", nuevoPeriodo);
   } catch (error) {
     handleErrorServer(res, 500, "Error al crear el período", error.message);
@@ -47,12 +61,27 @@ export async function updatePeriodo(req, res) {
     const { id } = req.params;
     const { body } = req;
 
-    const { error } = periodoBodyValidation.validate(body);
+    const { error, value } = periodoBodyValidation.validate(body);
     if (error) {
       return handleErrorClient(res, 400, "Parámetros inválidos", error.message);
     }
 
-    const periodoActualizado = await periodoService.updatePeriodoService(id, body);
+    const overlap = await periodoService.checkPeriodOverlapService(
+        value.fechaInicio,
+        value.fechaCierre,
+        value.visibilidad,
+        id 
+    );
+
+    if (overlap) {
+        return handleErrorClient(
+            res, 
+            400, 
+            "Ya existe un periodo activo en esas fechas"
+        );
+    }
+
+    const periodoActualizado = await periodoService.updatePeriodoService(id, value);
     handleSuccess(res, 200, "Período actualizado exitosamente", periodoActualizado);
   } catch (error) {
     if (error.message === "Período no encontrado") {
@@ -78,7 +107,6 @@ export async function deletePeriodo(req, res) {
 export async function getActivePeriod(req, res) {
   try {
     const userRole = req.user.role;
-
     const activePeriod = await periodoService.getActivePeriodForRoleService(userRole);
 
     if (!activePeriod) {

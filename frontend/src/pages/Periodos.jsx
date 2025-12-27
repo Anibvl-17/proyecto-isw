@@ -48,7 +48,7 @@ const Periodos = () => {
       return date.toISOString().slice(0, 16);
     };
 
-    const { value: formValues } = await Swal.fire({
+    const result = await Swal.fire({
       title: isEdit ? "Editar Periodo" : "Crear Periodo",
       html: `
         <div class="flex flex-col gap-4 text-left">
@@ -78,7 +78,8 @@ const Periodos = () => {
       showCancelButton: true,
       confirmButtonText: isEdit ? "Guardar Cambios" : "Crear",
       cancelButtonText: "Cancelar",
-      preConfirm: () => {
+      showLoaderOnConfirm: true, 
+      preConfirm: async () => {
         const nombre = document.getElementById("nombre").value.trim();
         const fechaInicio = document.getElementById("fechaInicio").value;
         const fechaCierre = document.getElementById("fechaCierre").value;
@@ -93,30 +94,36 @@ const Periodos = () => {
           return false;
         }
 
-        return {
+        const dataToSend = {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionCarreras: null, 
+          restriccionCarreras: null,
           restriccionAño: null,
           visibilidad,
         };
+
+        try {
+            if (isEdit) {
+                await updatePeriodo(periodoToEdit.id, dataToSend);
+            } else {
+                await createPeriodo(dataToSend);
+            }
+            return true; 
+        } catch (error) {
+            const message = error.response?.data?.message || "Error desconocido al procesar";
+            Swal.showValidationMessage(message);
+            return false; 
+        }
       },
     });
 
-    if (formValues) {
-      try {
-        if (isEdit) {
-          await updatePeriodo(periodoToEdit.id, formValues);
-          showSuccessAlert("¡Actualizado!", "Periodo modificado.");
-        } else {
-          await createPeriodo(formValues);
-          showSuccessAlert("¡Creado!", "Periodo creado exitosamente.");
-        }
-        fetchPeriodos();
-      } catch (error) {
-        showErrorAlert("Error", "No se pudo guardar el periodo.");
-      }
+    if (result.isConfirmed) {
+      showSuccessAlert(
+        isEdit ? "¡Actualizado!" : "¡Creado!",
+        isEdit ? "Periodo modificado correctamente." : "Periodo creado correctamente."
+      );
+      fetchPeriodos();
     }
   };
 
