@@ -100,7 +100,7 @@ const Profile = () => {
 
               {/* Carrera solo alumno y jefe carrera */}
               {(isAlumno || isJefeCarrera) && (
-                <div className="flex flex-row items-center gap-2 border-b border-b-gray-300 py-3">
+                <div className="flex flex-row items-center gap-2 py-3">
                   <span className="bg-blue-100 rounded-sm p-2">
                     <BookTextIcon className="text-blue-600 h-5 w-5" />
                   </span>
@@ -113,7 +113,7 @@ const Profile = () => {
 
               {/* Electivos inscritos solo alumno*/}
               {isAlumno && (
-                <div className="flex flex-row items-center gap-2 py-3">
+                <div className="flex flex-row items-center gap-2 py-3 border-t border-t-gray-300 ">
                   <span className="bg-blue-100 rounded-sm p-2">
                     <GraduationCap className="text-blue-600 h-5 w-5" />
                   </span>
