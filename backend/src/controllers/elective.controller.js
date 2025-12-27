@@ -7,7 +7,7 @@ import {
     handleErrorClient,
     handleErrorServer,
 } from "../handlers/responseHandlers.js";
-import { electiveBodyValidation } from "../validations/elective.validation.js";
+import { electiveBodyValidation, electiveStatusValidation } from "../validations/elective.validation.js";
 import { changeElectiveStatusService } from "../services/elective.service.js";
 import { checkTeacherPeriod } from "../services/periodo.service.js";
 
@@ -211,19 +211,22 @@ export async function deleteElective(req, res) {
 export async function updateElectiveStatus(req, res) {
     try {
         const { id } = req.params;
-        const { status, rejectReason } = req.body;
 
         if (!["jefe_carrera", "administrador"].includes(req.user.role)) {
             return handleErrorClient(res, 403, "Solo el jefe de carrera o administrador puede cambiar el estado.");
         }
 
-        if (!["Aprobado", "Rechazado"].includes(status)) {
-            return handleErrorClient(res, 400, "Estado inválido. Debe ser 'Aprobado' o 'Rechazado'.");
+        const { error, value } = electiveStatusValidation.validate(req.body, {
+            abortEarly: false,
+            stripUnknown: true
+        });
+
+        if (error){
+            const errorMessages = error.details.map(detail => detail.message);
+            return handleErrorClient(res, 400, "Error de validación", errorMessages.join(", "));
         }
 
-        if (status === "Rechazado" && (!rejectReason || rejectReason.trim().length < 10)) {
-            return handleErrorClient(res, 400, "Debe proporcionar un motivo de rechazo de al menos 10 caracteres.");
-        }
+        const { status, rejectReason } = value;
 
         const elective = await changeElectiveStatusService(id, status, rejectReason);
 
@@ -231,6 +234,7 @@ export async function updateElectiveStatus(req, res) {
             message: `Electivo ${status.toLowerCase()} exitosamente.`,
             data: elective
         });
+
     } catch (error) {
         return handleErrorServer(res, 500, error.message);
     }

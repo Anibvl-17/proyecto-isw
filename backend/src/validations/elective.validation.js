@@ -12,12 +12,12 @@ const validWeekDays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "S�
 
 const scheduleEntrySchema = Joi.object({
     day: Joi.string()
-    .valid(...validWeekDays)
-    .required()
-    .messages({
-        "any.only": "Día inválido. Días válidos: Lunes a Sábado",
-        "any.required": "El día es obligatorio"
-    }),
+        .valid(...validWeekDays)
+        .required()
+        .messages({
+            "any.only": "Día inválido. Días válidos: Lunes a Sábado",
+            "any.required": "El día es obligatorio"
+        }),
     startTime: timeFormat.required().messages({
         "any.required": "La hora de inicio es obligatoria",
         "string.empty": "La hora de inicio no puede estar vacía",
@@ -100,3 +100,30 @@ export const electiveBodyValidation = Joi.object({
     .options({
         stripUnknown: true,
     });
+
+export const electiveStatusValidation = Joi.object({
+    status: Joi.string()
+        .valid("Aprobado", "Rechazado")
+        .required()
+        .messages({
+            "any.only": "El estado debe ser 'Aprobado' o 'Rechazado'",
+            "any.required": "El estado es obligatorio"
+        }),
+
+    rejectReason: Joi.string()
+        .min(5)
+        .max(300)
+        .when("status", {
+            is: "Rechazado",
+            then: Joi.required(),
+            otherwise: Joi.optional()
+        })
+        .messages({
+            "string.empty": "El motivo de rechazo no puede estar vacío",
+            "string.min": "El motivo de rechazo debe tener al menos 5 caracteres",
+            "string.max": "El motivo de rechazo no puede exceder los 300 caracteres",
+            "any.required": "El motivo de rechazo es obligatorio cuando se rechaza un electivo"
+        })
+}).options({
+    stripUnknown: true,
+});
