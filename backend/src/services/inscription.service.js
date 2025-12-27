@@ -4,9 +4,27 @@ import { ElectiveEntity } from "../entities/elective.entity.js";
 import { IsNull, Not } from "typeorm";
 
 export async function createInscriptionService(data){
+    const { userId, electiveId } = data;
     const inscriptionRepository = AppDataSource.getRepository(Inscription);
+    const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
 
-    const newInscription = inscriptionRepository.create(data);
+    const elective = await electiveRepository.findOne({ where: { id: data.electiveId }});
+
+    if(!elective) throw new Error("Electivo no encontrado");
+
+    if(elective.quotas <= 0) throw new Error("No hay cupos disponibles para este electivo");
+
+    const inscription = await inscriptionRepository.findOne({ where: { userId, elective: { id: elective.id }}});
+
+    if (inscription) {
+    throw new Error("Ya tienes una inscripción para este electivo");
+    }
+
+    elective.quotas -= 1;
+    await electiveRepository.save(elective);
+
+    const newInscription = inscriptionRepository.create({userId, electiveId, estado: "pendiente"});
+
     return await inscriptionRepository.save(newInscription);
 }
 
@@ -40,7 +58,9 @@ export async function deleteInscriptionIdService(id){
 
     if(!inscription) return false;
 
-    if (inscription.estado === "aprobado") {
+    if(inscription.estado === "aprobado") throw new Error("No se puede eliminar ina inscripcion aprobada");
+
+    if (inscription.estado === "pendiente") {
         const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
         const elective = await electiveRepository.findOne({ where: { id: inscription.electiveId } });
         
@@ -70,13 +90,7 @@ export async function updateStatusService(id, data){
     const elective = await electiveRepository.findOne({ where: { id: inscription.electiveId } });
     
     if (elective) {
-        if (Status !== "aprobado" && data.estado === "aprobado") {
-            if (elective.quotas > 0) {
-                elective.quotas -= 1;
-                await electiveRepository.save(elective);
-            }
-        }
-        else if (Status === "aprobado" && data.estado === "rechazado") {
+        if ((Status === "pendiente" || Status === "aprobado") && data.estado === "rechazado") {
             elective.quotas += 1;
             await electiveRepository.save(elective);
         }

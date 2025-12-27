@@ -5,8 +5,22 @@ import cors from "cors";
 import { connectDb } from "./config/configDb.js";
 import { routerApi } from "./routes/index.routes.js";
 import { createInitialUsers } from "./config/initDb.js";
+import { Server } from "socket.io";
+import { createServer } from "http";
+import { initSocket } from "./socket.js";
 
 const app = express();
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
+
+initSocket(io);
+
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -32,8 +46,8 @@ connectDb()
 
     // Levanta el servidor
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-      console.log(`=> Servidor iniciado en http://localhost:${PORT}`);
+    httpServer.listen(PORT, () => {
+      console.log(`Servidor iniciado en http://localhost:${PORT}`);
     });
   })
   .catch((error) => {
