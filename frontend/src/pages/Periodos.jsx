@@ -48,7 +48,7 @@ const Periodos = () => {
       return date.toISOString().slice(0, 16);
     };
 
-    const { value: formValues } = await Swal.fire({
+    const result = await Swal.fire({
       title: isEdit ? "Editar Periodo" : "Crear Periodo",
       html: `
         <div class="flex flex-col gap-4 text-left">
@@ -65,15 +65,11 @@ const Periodos = () => {
             <input type="datetime-local" id="fechaCierre" class="swal2-input m-0" value="${formatForInput(periodoToEdit?.fechaCierre)}">
           </div>
           
-          <!-- SE ELIMINÓ RESTRICCIÓN AÑO AQUÍ -->
-
           <div>
-            <label class="text-sm font-medium">Visibilidad</label>
+            <label class="text-sm font-medium">¿Para quién es el periodo?</label>
             <select id="visibilidad" class="swal2-select m-0">
-              <option value="oculto" ${periodoToEdit?.visibilidad === 'oculto' || !periodoToEdit ? 'selected' : ''}>Oculto (nadie)</option>
               <option value="alumnos" ${periodoToEdit?.visibilidad === 'alumnos' ? 'selected' : ''}>Solo Alumnos</option>
               <option value="docentes" ${periodoToEdit?.visibilidad === 'docentes' ? 'selected' : ''}>Solo Docentes</option>
-              <option value="todos" ${periodoToEdit?.visibilidad === 'todos' ? 'selected' : ''}>Todos</option>
             </select>
           </div>
         </div>
@@ -82,7 +78,8 @@ const Periodos = () => {
       showCancelButton: true,
       confirmButtonText: isEdit ? "Guardar Cambios" : "Crear",
       cancelButtonText: "Cancelar",
-      preConfirm: () => {
+      showLoaderOnConfirm: true, 
+      preConfirm: async () => {
         const nombre = document.getElementById("nombre").value.trim();
         const fechaInicio = document.getElementById("fechaInicio").value;
         const fechaCierre = document.getElementById("fechaCierre").value;
@@ -97,29 +94,36 @@ const Periodos = () => {
           return false;
         }
 
-        return {
+        const dataToSend = {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionAño: null, 
+          restriccionCarreras: null,
+          restriccionAño: null,
           visibilidad,
         };
+
+        try {
+            if (isEdit) {
+                await updatePeriodo(periodoToEdit.id, dataToSend);
+            } else {
+                await createPeriodo(dataToSend);
+            }
+            return true; 
+        } catch (error) {
+            const message = error.response?.data?.message || "Error desconocido al procesar";
+            Swal.showValidationMessage(message);
+            return false; 
+        }
       },
     });
 
-    if (formValues) {
-      try {
-        if (isEdit) {
-          await updatePeriodo(periodoToEdit.id, formValues);
-          showSuccessAlert("¡Actualizado!", "Periodo modificado.");
-        } else {
-          await createPeriodo(formValues);
-          showSuccessAlert("¡Creado!", "Periodo creado exitosamente.");
-        }
-        fetchPeriodos();
-      } catch (error) {
-        showErrorAlert("Error", "No se pudo guardar el periodo.");
-      }
+    if (result.isConfirmed) {
+      showSuccessAlert(
+        isEdit ? "¡Actualizado!" : "¡Creado!",
+        isEdit ? "Periodo modificado correctamente." : "Periodo creado correctamente."
+      );
+      fetchPeriodos();
     }
   };
 
@@ -148,7 +152,7 @@ const Periodos = () => {
 
   const renderVisibilidadBadge = (visibilidad) => {
     switch (visibilidad) {
-      case "todos":
+      case "todos": 
         return <span className="flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 text-xs font-medium rounded-full border border-green-200"><Users className="w-4 h-4" /> Todos</span>;
       case "alumnos":
         return <span className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full border border-blue-200"><GraduationCap className="w-4 h-4" /> Alumnos</span>;
