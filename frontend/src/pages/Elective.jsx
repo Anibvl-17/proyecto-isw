@@ -124,7 +124,7 @@ const Electives = () => {
                 Swal.fire({ toast: true, title: response.message || "Electivo eliminado exitosamente", icon: "success", timer: 4000, timerProgressBar: true, position: "bottom-end", showConfirmButton: false });
                 await fetchElectives();
             } else showErrorAlert("Error", response.message);
-        } catch (error){
+        } catch (error) {
             console.error("Error al eliminar:", error);
 
             if (error.response?.status === 400 &&
@@ -203,21 +203,6 @@ const Electives = () => {
                         <p class="text-sm font-semibold text-gray-700">Prerrequisitos</p>
                         <p class="text-sm text-gray-900">${elective.prerrequisites || 'Ninguno'}</p>
                     </div>
-                     ${isPendiente && isJefeCarrera ? `
-                    <div class="mt-4">
-                        <label for="rejectReason" class="text-sm font-semibold text-gray-700 block mb-1">
-                            Motivo de rechazo <span class="text-gray-400 font-normal">(requerido si rechazas)</span>
-                        </label>
-                        <textarea 
-                            id="rejectReason" 
-                            rows="3" 
-                            maxlength="500"
-                            class="w-full border border-gray-300 px-3 py-2 text-sm rounded-md resize-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            placeholder="Escribe el motivo del rechazo..."
-                        ></textarea>
-                        <span class="text-xs text-gray-500 mt-1 block">Mínimo 10 caracteres</span>
-                    </div>
-                    ` : ''}
                 </div>
             `,
             showCloseButton: true,
@@ -235,19 +220,11 @@ const Electives = () => {
         if (result.isConfirmed) {
             await changeStatus(elective.id, "Aprobado", null);
         } else if (result.isDenied) {
-            const rejectReason = document.getElementById("rejectReason")?.value.trim();
+            const rejectReason = await reviewCommentDialog();
 
-            if (!rejectReason || rejectReason.length < 10) {
-                return Swal.fire({
-                    title: "Motivo requerido",
-                    text: "Debe ingresar un motivo de rechazo de al menos 10 caracteres.",
-                    icon: "warning",
-                    confirmButtonText: "Entendido",
-                    ConfirmButtonColor: "#3b82f6"
-                });
+            if (rejectReason) {
+                await changeStatus(elective.id, "Rechazado", rejectReason);
             }
-
-            await changeStatus(elective.id, "Rechazado", rejectReason);
         }
     };
 
@@ -696,5 +673,38 @@ async function electiveDialog(existingElective = null) {
 
     return formValues || null;
 }
+
+async function reviewCommentDialog() {
+    const { value: formValues } = await Swal.fire({
+        html:
+            '<div class="text-start flex flex-col gap-2">' +
+            '<p class="font-semibold text-xl mb-1 text-black">Motivo de rechazo</p>' +
+            '<label for="description" class="text-sm text-gray-600">Escriba el motivo de rechazo del electivo</label>' +
+            '<textarea class="text-sm p-2 border border-gray-300 outline-0 transition-all focus:border-blue-300" id="description"></textarea>' +
+            "</div>",
+        confirmButtonText: "Guardar comentario",
+        confirmButtonColor: "oklch(48.8% 0.243 264.376)",
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+        showCloseButton: true,
+        preConfirm: () => {
+            const reviewComment = document.getElementById("description").value.trim();
+            if (!reviewComment) {
+                Swal.showValidationMessage("El comentario es obligatorio");
+                return false;
+            }
+            if (reviewComment.length < 10 || reviewComment.length > 500) {
+                Swal.showValidationMessage(
+                    "El comentario debe contener entre 10 y 500 caracteres"
+                );
+                return false;
+            }
+            return reviewComment;
+        },
+    });
+
+    return formValues;
+}
+
 
 export default Electives;
