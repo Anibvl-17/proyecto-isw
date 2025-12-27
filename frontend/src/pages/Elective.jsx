@@ -495,10 +495,10 @@ async function electiveDialog(existingElective = null) {
             `<textarea id="prerrequisites" class="border border-gray-300 px-2 py-1 text-sm rounded-md outline-0 transition-all hover:shadow-sm focus:border-blue-700">${existingElective?.prerrequisites || ""}</textarea>` +
             "</div>" +
             '<div class="flex flex-col gap-2">' +
-            '<label class="text-sm font-semibold">Horarios de clases <span class="text-red-500">* (Máx 3 días)</span></label>' +
+            '<label class="text-sm font-semibold">Horarios de clases <span class="text-red-500">*</span></label>' +
             '<div id="schedule-container" class="flex flex-col gap-3"></div>' +
             '<button type="button" id="add-schedule-btn" class="text-sm text-blue-600 hover:text-blue-800 font-medium self-start">+ Agregar día</button>' +
-            '<span class="text-xs text-gray-500">Selecciona entre 1 y 3 días con sus respectivos horarios</span>' +
+            '<span class="text-xs text-gray-500">Selecciona los días con sus respectivos horarios</span>' +
             "</div>" +
             '<div class="flex flex-col gap-0.5">' +
             '<label for="quotas" class="text-sm font-medium">Cupos</label>' +
@@ -589,17 +589,22 @@ async function electiveDialog(existingElective = null) {
             };
 
             const updateAddButtonState = () => {
-                if (scheduleEntries.length >= 3) {
+                const usedDays = scheduleEntries.map(e => e.day).filter(d => d);
+                const availableDays = weekDays.filter(day => !usedDays.includes(day.id));
+
+                if (scheduleEntries.length >= weekDays.length || availableDays.length === 0) {
                     addScheduleBtn.disabled = true;
                     addScheduleBtn.classList.add("opacity-50", "cursor-not-allowed");
+                    addScheduleBtn.textContent = "+ Sin días disponibles";
                 } else {
                     addScheduleBtn.disabled = false;
                     addScheduleBtn.classList.remove("opacity-50", "cursor-not-allowed");
+                    addScheduleBtn.textContent = "+ Agregar día";
                 }
             };
 
             addScheduleBtn.addEventListener("click", () => {
-                if (scheduleEntries.length < 3) {
+                if (scheduleEntries.length < weekDays.length) {
                     scheduleEntries.push({ day: "", startTime: "", endTime: "" });
                     renderSchedules();
                 }
@@ -626,8 +631,12 @@ async function electiveDialog(existingElective = null) {
             if (!objectives || objectives.length < 10) {
                 return Swal.showValidationMessage("Los objetivos deben tener al menos 10 caracteres");
             }
-            if (scheduleEntries.length < 1 || scheduleEntries.length > 3) {
-                return Swal.showValidationMessage("Debe seleccionar entre 1 y 3 días de clase");
+            if (scheduleEntries.length < 1) {
+                return Swal.showValidationMessage("Debe seleccionar al menos 1 día de clase");
+            }
+
+            if (scheduleEntries.length > 6) {
+                return Swal.showValidationMessage("No puede seleccionar más de 6 días");
             }
 
             for (let i = 0; i < scheduleEntries.length; i++) {

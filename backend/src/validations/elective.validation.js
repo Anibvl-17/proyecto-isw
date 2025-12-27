@@ -55,13 +55,11 @@ export const electiveBodyValidation = Joi.object({
     schedule: Joi.array()
         .items(scheduleEntrySchema)
         .min(1)
-        .max(3)
         .unique((a, b) => a.day === b.day)
         .required()
         .messages({
             "array.base": "El horario debe ser un arreglo",
             "array.min": "Debe seleccionar al menos 1 día de clase",
-            "array.max": "No puede seleccionar más de 3 días de clases",
             "array.unique": "No puede repetir el mismo día",
             "any.required": "El horario es obligatorio",
         }),
