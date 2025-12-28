@@ -11,8 +11,6 @@ const Profile = () => {
   const { user } = useAuth();
   const isAlumno = user.role === "alumno";
   const isDocente = user.role === "docente";
-  const isJefeCarrera = user.role === "jefe_carrera";
-  const isAdmin = user.role === "administrador";
 
   const [inscriptionsCount, setInscriptionsCount] = useState(0);
   const [electiveCount, setElectiveCount] = useState(0);
@@ -61,7 +59,7 @@ const Profile = () => {
   useEffect(() => {
     fetchInscriptions();
     fetchElectives();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const roleText = {
@@ -135,55 +133,43 @@ const Profile = () => {
             </div>
 
             {/* Información Académica */}
-            <div className="flex flex-col p-4 rounded-md border border-gray-300 shadow-sm flex-1 transition-all hover:shadow-md">
-              <h3 className="font-medium text-xl mb-2">Información Académica</h3>
-              {isAdmin && <p className="text-gray-600 italic">No disponible para administrador.</p>}
+            {(isAlumno || isDocente) && (
+              <div className="flex flex-col p-4 rounded-md border border-gray-300 shadow-sm flex-1 transition-all hover:shadow-md">
+                <h3 className="font-medium text-xl mb-2">Información Académica</h3>
 
-              {/* Carrera solo alumno y jefe carrera */}
-              {(isAlumno || isJefeCarrera) && (
-                <div className="flex flex-row items-center gap-2 py-3">
-                  <span className="bg-blue-100 rounded-sm p-2">
-                    <BookTextIcon className="text-blue-600 h-5 w-5" />
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500">Carrera</span>
-                    <span className="font-medium">[carrera]</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Electivos inscritos solo alumno*/}
-              {isAlumno && (
-                <div className="flex flex-row items-center gap-2 py-3 border-t border-t-gray-300 ">
-                  <span className="bg-blue-100 rounded-sm p-2">
-                    <GraduationCap className="text-blue-600 h-5 w-5" />
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500">Electivos inscritos</span>
-                    <span className="font-medium">
-                      {loading ? "Cargando " : inscriptionsCount}{" "}
-                      {inscriptionsCount === 1 ? "electivo" : "electivos"}
+                {/* Electivos inscritos solo alumno*/}
+                {isAlumno && (
+                  <div className="flex flex-row items-center gap-2 py-3">
+                    <span className="bg-blue-100 rounded-sm p-2">
+                      <GraduationCap className="text-blue-600 h-5 w-5" />
                     </span>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500">Electivos inscritos</span>
+                      <span className="font-medium">
+                        {loading ? "Cargando " : inscriptionsCount}{" "}
+                        {inscriptionsCount === 1 ? "electivo" : "electivos"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Electivos creados solo docente */}
-              {isDocente && (
-                <div className="flex flex-row items-center gap-2 py-3">
-                  <span className="bg-blue-100 rounded-sm p-2">
-                    <GraduationCap className="text-blue-600 h-5 w-5" />
-                  </span>
-                  <div className="flex flex-col">
-                    <span className="text-xs text-gray-500">Electivos creados</span>
-                    <span className="font-medium">
-                      {loading ? "Cargando " : electiveCount}{" "}
-                      {electiveCount === 1 ? "electivo" : "electivos"}
+                {/* Electivos creados solo docente */}
+                {isDocente && (
+                  <div className="flex flex-row items-center gap-2 py-3">
+                    <span className="bg-blue-100 rounded-sm p-2">
+                      <GraduationCap className="text-blue-600 h-5 w-5" />
                     </span>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500">Electivos creados</span>
+                      <span className="font-medium">
+                        {loading ? "Cargando " : electiveCount}{" "}
+                        {electiveCount === 1 ? "electivo" : "electivos"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -10,8 +10,6 @@ import { CheckCircle, MessageSquareDashedIcon, MessageSquarePlus } from "lucide-
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-// Pendiente:
-// - Controlar la cantidad de solicitudes mostradas (10 o 20 por página)
 const Requests = () => {
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState([]);
@@ -61,8 +59,6 @@ const Requests = () => {
     fetchRequests();
   }, []);
 
-  // Verificar periodos a la hora de inscribir:
-  // - Permitir solicitud a un mismo electivo pero en distinto periodo
   const handleCreateRequest = async () => {
     try {
       const formValues = await createRequestDialog();
@@ -189,21 +185,21 @@ const Requests = () => {
               <div className="flex-2">
                 <h3 className="text-xl font-semibold mb-4">Solicitudes pendientes</h3>
                 <div className="flex flex-col gap-3">
-                {pendingCounter > 0 ? (
-                  requests.map((request) => {
-                    if (request.status === "pendiente")
-                      return <Request key={request.id} request={request} />;
-                  })
-                ) : (
-                  <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
-                    Haz click en el botón
-                    <span className="text-gray-600 border border-dashed border-gray-400 font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg">
-                      <MessageSquarePlus className="h-4 w-4" />
-                      Nueva Solicitud
-                    </span>
-                    para crear una solicitud de inscripción
-                  </p>
-                )}
+                  {pendingCounter > 0 ? (
+                    requests.map((request) => {
+                      if (request.status === "pendiente")
+                        return <Request key={request.id} request={request} />;
+                    })
+                  ) : (
+                    <p className="text-gray-600 italic w-full flex flex-row gap-3 items-center">
+                      Haz click en el botón
+                      <span className="text-gray-600 border border-dashed border-gray-400 font-medium text-sm px-4 py-2 flex flex-row items-center gap-3 rounded-lg">
+                        <MessageSquarePlus className="h-4 w-4" />
+                        Nueva Solicitud
+                      </span>
+                      para crear una solicitud de inscripción
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -211,24 +207,24 @@ const Requests = () => {
               <div className="flex-1">
                 <h3 className="text-xl font-semibold mb-4">Historial de solicitudes</h3>
                 <div className="flex flex-col gap-2">
-                {approvedCounter > 0 || rejectedCounter > 0 ? (
-                  requests.map((request) => {
-                    if (request.status !== "pendiente")
-                      return <Request key={request.id} request={request} isCompact={true} />;
-                  })
-                ) : (
-                  <p className="text-gray-600 italic flex flex-row gap-2 items-center">
-                    <MessageSquareDashedIcon className="h-5 w-5" /> Las solicitudes revisadas
-                    aparecerán aquí
-                  </p>
-                )}
+                  {approvedCounter > 0 || rejectedCounter > 0 ? (
+                    requests.map((request) => {
+                      if (request.status !== "pendiente")
+                        return <Request key={request.id} request={request} isCompact={true} />;
+                    })
+                  ) : (
+                    <p className="text-gray-600 italic flex flex-row gap-2 items-center">
+                      <MessageSquareDashedIcon className="h-5 w-5" /> Las solicitudes revisadas
+                      aparecerán aquí
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
           {/* Tabla con solicitudes para jefe de carrera */}
-          {(!loading && !isAlumno && requests.length > 0 && (
+          {!loading && !isAlumno && requests.length > 0 && (
             <div className="flex flex-row flex-wrap gap-6">
               {/* Tabla de solicitudes pendientes */}
               <div className="flex-2">
@@ -257,7 +253,13 @@ const Requests = () => {
                     <tbody>
                       {requests.map((request) => {
                         if (request.status === "pendiente" && showPending)
-                          return <Request key={request.id} request={request} fetchCallback={fetchRequests}/>;
+                          return (
+                            <Request
+                              key={request.id}
+                              request={request}
+                              fetchCallback={fetchRequests}
+                            />
+                          );
 
                         if (request.status === "aprobado" && showApproved)
                           return <Request key={request.id} request={request} />;
@@ -270,7 +272,7 @@ const Requests = () => {
                 </div>
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
@@ -292,7 +294,7 @@ async function createRequestDialog() {
       confirmButtonText: "Volver",
       confirmButtonColor: "oklch(48.8% 0.243 264.376)",
       timer: 5000,
-      timerProgressBar: true
+      timerProgressBar: true,
     });
 
     return;
@@ -309,9 +311,9 @@ async function createRequestDialog() {
       '<div class="flex flex-col gap-0.5">' +
       '<label for="elective" class="text-sm font-medium">Electivo a Inscribir</label>' +
       '<select id="elective" class="border border-gray-300 px-2 py-1 text-sm rounded-md outline-0 transition-all hover:shadow-sm focus:border-blue-700">' +
-      (electives.map((elective) => 
-        '<option value="' + elective.id + '" selected>' + elective.name + '</option>'
-      ))+
+      electives.map(
+        (elective) => '<option value="' + elective.id + '" selected>' + elective.name + "</option>"
+      ) +
       "</select>" +
       "</div>" +
       // Input Descripción

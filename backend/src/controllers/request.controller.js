@@ -3,9 +3,18 @@ import {
   handleErrorServer,
   handleSuccess,
 } from "../handlers/responseHandlers.js";
-import { createRequestService, getRequestsService, getRequestByIdService, reviewRequestService, hasRequestOfElectiveService } from "../services/request.service.js";
+import {
+  createRequestService,
+  getRequestsService,
+  getRequestByIdService,
+  reviewRequestService,
+  hasRequestOfElectiveService,
+} from "../services/request.service.js";
 import { hasInscriptionToElectiveService } from "../services/inscription.service.js";
-import { createRequestBodyValidation, reviewRequestValidation } from "../validations/request.validation.js";
+import {
+  createRequestBodyValidation,
+  reviewRequestValidation,
+} from "../validations/request.validation.js";
 import jwt from "jsonwebtoken";
 
 export async function createRequest(req, res) {
@@ -22,12 +31,14 @@ export async function createRequest(req, res) {
 
     // Verifica si ya esta inscrito al electivo que solicita inscribirse
     const hasInscription = await hasInscriptionToElectiveService(body.studentId, body.electiveId);
-    if (hasInscription) return handleErrorClient(res, 409, "Ya hay una inscripción al electivo indicado");
+    if (hasInscription)
+      return handleErrorClient(res, 409, "Ya hay una inscripción al electivo indicado");
 
-    // Verifica si ya existe una solicitud al electivo anteriormente para evitar 
+    // Verifica si ya existe una solicitud al electivo anteriormente para evitar
     // solicitudes duplicadas
     const hasRequest = await hasRequestOfElectiveService(payload.id, body.electiveId);
-    if (hasRequest) return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
+    if (hasRequest)
+      return handleErrorClient(res, 409, "Ya existe una solicitud al electivo indicado");
 
     const newRequest = await createRequestService(body);
     handleSuccess(res, 201, "Solicitud creada exitosamente", newRequest);
@@ -45,10 +56,10 @@ export async function getRequests(req, res) {
     const payload = jwt.decode(token, process.env.JWT_SECRET);
 
     // Los alumnos solo pueden ver sus propias solicitudes
-    if (payload.role === "alumno") {      
+    if (payload.role === "alumno") {
       requests = requests.filter((request) => request.studentId === payload.id);
     }
-    
+
     if (requests.length === 0) return handleSuccess(res, 204, "No hay solicitudes disponibles");
     handleSuccess(res, 200, "Solicitudes obtenidas exitosamente", requests);
   } catch (error) {

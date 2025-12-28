@@ -38,16 +38,27 @@ const Home = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const inscriptionResult = await getInscription();
+      const inscriptionResult = isAlumno || isDocente ? await getInscription() : null;
       const electiveResult = await getElectives();
-      const requestsResult = await getRequests();
+      const requestsResult = isAlumno || isJefeCarrera ? await getRequests() : null;
       const activePeriodsResult = await getActivePeriod();
       const usersResult = isAdmin ? await getUsers() : null;
 
-      if (inscriptionResult.success) setInscriptionCounter(inscriptionResult.data?.length || 0);
-      if (requestsResult.success) setRequestsCounter(requestsResult.data?.length || 0);
-      if (electiveResult.success) setElectiveCounter(electiveResult.data?.length || 0);
-      if (usersResult != null && usersResult.success) setUserCounter(usersResult.data?.length || 0);
+      if (inscriptionResult != null && inscriptionResult.success) {
+        setInscriptionCounter(inscriptionResult.data?.length || 0);
+      }
+      
+      if (requestsResult != null && requestsResult.success) {
+        setRequestsCounter(requestsResult.data?.length || 0);
+      }
+
+      if (electiveResult.success) {
+        setElectiveCounter(electiveResult.data?.length || 0);
+      }
+
+      if (usersResult != null && usersResult.success) {
+        setUserCounter(usersResult.data?.length || 0);
+      }
 
       // Siempre array
       setActivePeriods(activePeriodsResult || []);
@@ -60,7 +71,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatDate = (dateString) => {
@@ -126,32 +137,19 @@ const Home = () => {
                 </div>
 
                 <div className="flex flex-row gap-4 w-full flex-wrap">
-                  {/* CARD 1 solo para alumno */}
-                  {isAlumno && (
-                    <div className="rounded-lg bg-sky-100 p-4 flex-1">
-                      <p className="text-md font-medium text-gray-700">Tu carrera</p>
-                      <p className="text-lg font-semibold text-blue-700">
-                        Ingeniería de Ejecución en Computación e Informática
-                      </p>
-                    </div>
-                  )}
-
-                  {/* CARD 2 */}
+                  {/* Card periodo */}
                   <div className="rounded-lg bg-blue-100/75 p-4 flex-1">
                     <p className="text-md font-medium text-gray-700">Periodo actual</p>
                     <p className="text-lg font-semibold text-blue-700">2025-2</p>
                   </div>
 
-                  {/* CARD 3 */}
+                  {/* Card fechas periodo*/}
                   <div className="rounded-lg bg-purple-100/50 p-4 flex-1">
                     {activePeriods.length > 0 ? (
                       activePeriods.map((periodo) => (
                         <div key={periodo.id} className="mb-2 last:mb-0">
-                          <p
-                            className="text-md font-medium text-gray-700 truncate"
-                            title={periodo.nombre}
-                          >
-                            {periodo.nombre}
+                          <p className="text-md font-medium text-gray-700 truncate">
+                            Fechas del período
                           </p>
                           <p className="text-lg font-semibold text-purple-700 leading-tight">
                             {formatDate(periodo.fechaInicio)} - {formatDate(periodo.fechaCierre)}
