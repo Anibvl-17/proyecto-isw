@@ -1,3 +1,5 @@
+"use strict";
+
 import { EntitySchema } from "typeorm";
 
 export const Periodo = new EntitySchema({
@@ -13,29 +15,23 @@ export const Periodo = new EntitySchema({
       type: "varchar",
       length: 255,
       nullable: false,
-      comment: "Nombre del periodo, ej: 'Inscripción Electivos 2025-1'",
+      comment: "Nombre descriptivo del periodo",
     },
     fechaInicio: {
       type: "timestamp",
       nullable: false,
-      comment: "Fecha y hora de inicio del periodo de inscripción",
+      comment: "Momento exacto en que inicia el periodo",
     },
     fechaCierre: {
       type: "timestamp",
       nullable: false,
-      comment: "Fecha y hora de cierre del periodo de inscripción",
-    },
-    restriccionAño: {
-      type: "int",
-      nullable: true,
-      comment: "Año académico mínimo requerido. Nulo si no hay restricción.",
+      comment: "Momento exacto en que finaliza el periodo",
     },
     visibilidad: {
-      type: "enum",
-      enum: ["oculto", "alumnos", "docentes", "todos"],
-      default: "oculto",
+      type: "varchar", 
+      default: "alumnos",
       nullable: false,
-      comment: "Quién puede ver este periodo: 'oculto' (nadie), 'alumnos', 'docentes' o 'todos'",
+      comment: "Define el rol objetivo: 'alumnos' o 'docentes'",
     },
     created_at: {
       type: "timestamp",

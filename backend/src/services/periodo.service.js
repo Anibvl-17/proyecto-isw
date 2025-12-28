@@ -1,6 +1,5 @@
 import { AppDataSource } from "../config/configDb.js";
 import { Periodo } from "../entities/periodo.entity.js";
-// Agregamos 'Not' a los imports
 import { LessThanOrEqual, MoreThanOrEqual, In, Not } from "typeorm";
 
 // Crear un nuevo periodo

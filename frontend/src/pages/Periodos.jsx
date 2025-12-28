@@ -93,13 +93,20 @@ const Periodos = () => {
           Swal.showValidationMessage("La fecha de cierre debe ser posterior a la de inicio");
           return false;
         }
+        if (!isEdit) {
+            const now = new Date();
+            if (new Date(fechaInicio) < new Date(now.getTime() - 60000)) {
+                Swal.showValidationMessage("La fecha de inicio no puede ser pasada");
+                return false;
+            }
+        }
 
         const dataToSend = {
           nombre,
           fechaInicio,
           fechaCierre,
-          restriccionCarreras: null,
-          restriccionAño: null,
+          restriccionCarreras: null, 
+          restriccionAño: null, 
           visibilidad,
         };
 
@@ -111,8 +118,14 @@ const Periodos = () => {
             }
             return true; 
         } catch (error) {
-            const message = error.response?.data?.message || "Error desconocido al procesar";
-            Swal.showValidationMessage(message);
+            const responseData = error.response?.data;
+            let message = responseData?.message;
+            if (message === "Parámetros inválidos" && responseData?.data) {
+                message = responseData.data; 
+            }
+            if (!message) message = "Error desconocido al procesar";
+
+            Swal.showValidationMessage(message); 
             return false; 
         }
       },
