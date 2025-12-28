@@ -22,7 +22,7 @@ export async function createRequest(req, res) {
 
     // Verifica si ya esta inscrito al electivo que solicita inscribirse
     const hasInscription = await hasInscriptionToElectiveService(body.studentId, body.electiveId);
-    if (hasInscription) return handleErrorClient(res, 409, "Ya estás inscrito al electivo indicado");
+    if (hasInscription) return handleErrorClient(res, 409, "Ya hay una inscripción al electivo indicado");
 
     // Verifica si ya existe una solicitud al electivo anteriormente para evitar 
     // solicitudes duplicadas
