@@ -1,4 +1,6 @@
 import { AppDataSource } from "../config/configDb.js";
+import { ElectiveEntity } from "../entities/elective.entity.js";
+import { Inscription } from "../entities/inscription.entity.js";
 import { Request } from "../entities/request.entity.js";
 
 export async function createRequestService(data) {
@@ -28,13 +30,13 @@ export async function hasRequestOfElectiveService(studentId, electiveId) {
   const requestRepository = AppDataSource.getRepository(Request);
   const request = await requestRepository.find({
     where: [
-      {studentId, electiveId, status: "pendiente"},
-      {studentId, electiveId, status: "aprobado"}
-      ]
+      { studentId, electiveId, status: "pendiente" },
+      { studentId, electiveId, status: "aprobado" },
+    ],
   });
 
   if (request.length === 0) return false;
-  
+
   return true;
 }
 
@@ -51,6 +53,26 @@ export async function reviewRequestService(id, data) {
   }
 
   const updatedRequest = await requestRepository.save(request);
+
+  // En caso de aprobar la solicitud, se crea la inscripción
+  if (request.status === "aprobado") {
+    const { studentId, electiveId } = request;
+    const inscriptionRepository = AppDataSource.getRepository(Inscription);
+    const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
+    const elective = await electiveRepository.findOne({ where: { id: electiveId } });
+
+    if (elective.quotas > 0) elective.quotas -= 1;
+    await electiveRepository.save(elective);
+    const newInscription = inscriptionRepository.create({
+      userId: studentId,
+      electiveId: elective.id,
+      estado: "aprobado",
+      reviewedAt: new Date(),
+    });
+
+    return await inscriptionRepository.save(newInscription);
+  }
+
   return updatedRequest;
 }
 
