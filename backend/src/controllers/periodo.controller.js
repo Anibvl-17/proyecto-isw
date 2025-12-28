@@ -4,6 +4,7 @@ import * as periodoService from "../services/periodo.service.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
 import { periodoBodyValidation } from "../validations/periodo.validation.js";
 
+// Crear período
 export async function createPeriodo(req, res) {
   try {
     const { body } = req;
@@ -34,6 +35,7 @@ export async function createPeriodo(req, res) {
   }
 }
 
+// Listar periodos
 export async function getPeriodos(req, res) {
   try {
     const periodos = await periodoService.getPeriodosService();
@@ -43,6 +45,7 @@ export async function getPeriodos(req, res) {
   }
 }
 
+// Obtener periodos por ID
 export async function getPeriodoById(req, res) {
   try {
     const { id } = req.params;
@@ -56,6 +59,7 @@ export async function getPeriodoById(req, res) {
   }
 }
 
+// Actualizar período
 export async function updatePeriodo(req, res) {
   try {
     const { id } = req.params;
@@ -91,6 +95,7 @@ export async function updatePeriodo(req, res) {
   }
 }
 
+// Eliminar período
 export async function deletePeriodo(req, res) {
   try {
     const { id } = req.params;
@@ -104,6 +109,7 @@ export async function deletePeriodo(req, res) {
   }
 }
 
+// Obtener período activo según rol
 export async function getActivePeriod(req, res) {
   try {
     const userRole = req.user.role;

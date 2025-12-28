@@ -78,7 +78,7 @@ const Periodos = () => {
       showCancelButton: true,
       confirmButtonText: isEdit ? "Guardar Cambios" : "Crear",
       cancelButtonText: "Cancelar",
-      showLoaderOnConfirm: true, // Importante para UX mientras espera al backend
+      showLoaderOnConfirm: true, 
       preConfirm: async () => {
         const nombre = document.getElementById("nombre").value.trim();
         const fechaInicio = document.getElementById("fechaInicio").value;
@@ -93,13 +93,9 @@ const Periodos = () => {
           Swal.showValidationMessage("La fecha de cierre debe ser posterior a la de inicio");
           return false;
         }
-
-        // --- VALIDACIÓN LOCAL DE FECHA PASADA ---
-        // Si estamos creando (no editando) y la fecha de inicio es anterior a "ahora"
         if (!isEdit) {
             const now = new Date();
             if (new Date(fechaInicio) < new Date(now.getTime() - 60000)) {
-                // AQUÍ CAMBIAMOS EL MENSAJE LOCAL:
                 Swal.showValidationMessage("La fecha de inicio no puede ser pasada");
                 return false;
             }
@@ -110,31 +106,27 @@ const Periodos = () => {
           fechaInicio,
           fechaCierre,
           restriccionCarreras: null, 
-          restriccionAño: null, // Eliminado del form, enviamos null
+          restriccionAño: null, 
           visibilidad,
         };
 
         try {
-            // Llamada al backend DENTRO de preConfirm
             if (isEdit) {
                 await updatePeriodo(periodoToEdit.id, dataToSend);
             } else {
                 await createPeriodo(dataToSend);
             }
-            return true; // Éxito, cerramos modal
+            return true; 
         } catch (error) {
-            // --- AQUÍ MEJORAMOS LA CAPTURA DEL ERROR ---
             const responseData = error.response?.data;
-            // Si el mensaje es "Parámetros inválidos", intentamos mostrar el detalle ('data')
             let message = responseData?.message;
             if (message === "Parámetros inválidos" && responseData?.data) {
-                message = responseData.data; // Aquí vendrá "La fecha de inicio no puede ser..."
+                message = responseData.data; 
             }
-            // Si no hay mensaje claro, ponemos uno por defecto
             if (!message) message = "Error desconocido al procesar";
 
             Swal.showValidationMessage(message); 
-            return false; // Mantenemos el modal abierto
+            return false; 
         }
       },
     });
