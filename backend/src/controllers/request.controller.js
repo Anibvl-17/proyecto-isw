@@ -4,6 +4,7 @@ import {
   handleSuccess,
 } from "../handlers/responseHandlers.js";
 import { createRequestService, getRequestsService, getRequestByIdService, reviewRequestService, hasRequestOfElectiveService } from "../services/request.service.js";
+import { hasInscriptionToElectiveService } from "../services/inscription.service.js";
 import { createRequestBodyValidation, reviewRequestValidation } from "../validations/request.validation.js";
 import jwt from "jsonwebtoken";
 
@@ -18,6 +19,10 @@ export async function createRequest(req, res) {
     const token = authHeader.split(" ")[1];
     const payload = jwt.decode(token, process.env.JWT_SECRET);
     body.studentId = payload.id;
+
+    // Verifica si ya esta inscrito al electivo que solicita inscribirse
+    const hasInscription = await hasInscriptionToElectiveService(body.studentId, body.electiveId);
+    if (hasInscription) return handleErrorClient(res, 409, "Ya estás inscrito al electivo indicado");
 
     // Verifica si ya existe una solicitud al electivo anteriormente para evitar 
     // solicitudes duplicadas
