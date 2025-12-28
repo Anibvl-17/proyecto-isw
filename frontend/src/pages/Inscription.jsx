@@ -98,7 +98,9 @@ const Inscriptions = () => {
             {!loading && inscriptions.length === 0 && (
               <p className="text-gray-600 italic flex gap-2 items-center">
                 <CheckCircle className="h-5 w-5" />
-                No hay inscripciones disponibles.
+                {isAlumno
+                  ? "No hay inscripciones disponibles."
+                  : "No hay alumnos inscritos."}
               </p>
             )}
           </div>
