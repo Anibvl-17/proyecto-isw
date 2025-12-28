@@ -126,32 +126,21 @@ const Home = () => {
                 </div>
 
                 <div className="flex flex-row gap-4 w-full flex-wrap">
-                  {/* CARD 1 solo para alumno */}
-                  {isAlumno && (
-                    <div className="rounded-lg bg-sky-100 p-4 flex-1">
-                      <p className="text-md font-medium text-gray-700">Tu carrera</p>
-                      <p className="text-lg font-semibold text-blue-700">
-                        Ingeniería de Ejecución en Computación e Informática
-                      </p>
-                    </div>
-                  )}
-
-                  {/* CARD 2 */}
+                  {/* Card periodo */}
                   <div className="rounded-lg bg-blue-100/75 p-4 flex-1">
                     <p className="text-md font-medium text-gray-700">Periodo actual</p>
                     <p className="text-lg font-semibold text-blue-700">2025-2</p>
                   </div>
 
-                  {/* CARD 3 */}
+                  {/* Card fechas periodo*/}
                   <div className="rounded-lg bg-purple-100/50 p-4 flex-1">
                     {activePeriods.length > 0 ? (
                       activePeriods.map((periodo) => (
                         <div key={periodo.id} className="mb-2 last:mb-0">
                           <p
                             className="text-md font-medium text-gray-700 truncate"
-                            title={periodo.nombre}
                           >
-                            {periodo.nombre}
+                            Fechas del período
                           </p>
                           <p className="text-lg font-semibold text-purple-700 leading-tight">
                             {formatDate(periodo.fechaInicio)} - {formatDate(periodo.fechaCierre)}
