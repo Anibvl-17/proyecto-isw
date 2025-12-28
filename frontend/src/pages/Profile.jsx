@@ -61,6 +61,7 @@ const Profile = () => {
   useEffect(() => {
     fetchInscriptions();
     fetchElectives();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const roleText = {
