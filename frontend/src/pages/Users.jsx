@@ -59,7 +59,6 @@ const Users = () => {
 
         await fetchUsers();
       } else {
-        // VERIFICAR ANTES, en preConfirm del dialog!
         if (registerResponse.message.includes("RUT")) {
           showErrorAlert("Error", "El RUT ya está registrado");
         }
@@ -94,7 +93,6 @@ const Users = () => {
 
         await fetchUsers();
       } else {
-        // VERIFICAR ANTES, en preConfirm del dialog!
         if (editResponse.message.includes("RUT")) {
           showErrorAlert("Error", "El RUT ya está registrado");
         }

@@ -324,8 +324,6 @@ async function requestDetailsDialog(request, student, elective, isAlumno) {
     showCloseButton: true,
     preConfirm: () => {
       const status = "aprobado";
-      //const reviewComment = "";
-
       return { status };
     },
     preDeny: async () => {

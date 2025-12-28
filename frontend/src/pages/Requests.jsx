@@ -10,8 +10,6 @@ import { CheckCircle, MessageSquareDashedIcon, MessageSquarePlus } from "lucide-
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-// Pendiente:
-// - Controlar la cantidad de solicitudes mostradas (10 o 20 por página)
 const Requests = () => {
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState([]);
@@ -61,8 +59,6 @@ const Requests = () => {
     fetchRequests();
   }, []);
 
-  // Verificar periodos a la hora de inscribir:
-  // - Permitir solicitud a un mismo electivo pero en distinto periodo
   const handleCreateRequest = async () => {
     try {
       const formValues = await createRequestDialog();
