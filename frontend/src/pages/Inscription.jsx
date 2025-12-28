@@ -7,6 +7,7 @@ import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { Inscription } from "@components/Inscription";
 import { Badge } from "@components/Badge";
+import { CheckCircle } from "lucide-react";
 
 const Inscriptions = () => {
   const [loading, setLoading] = useState(false);
@@ -80,21 +81,30 @@ const Inscriptions = () => {
             </p>
           </div>
 
-          {/* BADGES */}
-          <div className="flex gap-4">
-            {pendingCounter > 0 && (
-              <Badge type="pending" text={`${pendingCounter} pendientes`} callback={badgeAction} badgeId="pending-counter" canToggleActive />
-            )}
-            {approvedCounter > 0 && (
-              <Badge type="success" text={`${approvedCounter} aprobadas`} callback={badgeAction} badgeId="approved-counter" canToggleActive />
-            )}
-            {rejectedCounter > 0 && (
-              <Badge type="error" text={`${rejectedCounter} rechazadas`} callback={badgeAction} badgeId="rejected-counter" canToggleActive />
+          <div className="flex flex-col gap-3">
+            {/* BADGES */}
+            <div className="flex gap-4">
+              {pendingCounter > 0 && (
+                <Badge type="pending" text={`${pendingCounter} pendientes`} callback={badgeAction} badgeId="pending-counter" canToggleActive />
+              )}
+              {approvedCounter > 0 && (
+                <Badge type="success" text={`${approvedCounter} aprobadas`} callback={badgeAction} badgeId="approved-counter" canToggleActive />
+              )}
+              {rejectedCounter > 0 && (
+                <Badge type="error" text={`${rejectedCounter} rechazadas`} callback={badgeAction} badgeId="rejected-counter" canToggleActive />
+              )}
+            </div>
+
+            {!loading && inscriptions.length === 0 && (
+              <p className="text-gray-600 italic flex gap-2 items-center">
+                <CheckCircle className="h-5 w-5" />
+                No hay inscripciones disponibles.
+              </p>
             )}
           </div>
 
           {/* VISTA ALUMNO */}
-          {isAlumno && inscriptions.length > 0 && (
+          {isAlumno && !loading && inscriptions.length > 0 && (
             <div className="flex flex-col gap-6">
               <h3 className="text-xl font-semibold">Mis Inscripciones</h3>
               {inscriptions.map(inscription => {
