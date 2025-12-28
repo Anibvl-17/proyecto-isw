@@ -61,7 +61,7 @@ export async function reviewRequestService(id, data) {
     const electiveRepository = AppDataSource.getRepository(ElectiveEntity);
     const elective = await electiveRepository.findOne({ where: { id: electiveId } });
 
-    elective.quotas -= 1;
+    if (elective.quotas > 0) elective.quotas -= 1;
     await electiveRepository.save(elective);
     const newInscription = inscriptionRepository.create({
       userId: studentId,
