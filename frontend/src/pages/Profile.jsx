@@ -2,6 +2,10 @@ import { useAuth } from "@context/AuthContext";
 import { Sidebar } from "@components/Sidebar";
 import { Header } from "@components/Header";
 import { BookTextIcon, GraduationCap, IdCard, Mail, User, UserCog } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getInscription } from "@services/inscription.service";
+import { showErrorAlert } from "@helpers/sweetAlert";
+import { getElectives } from "@services/elective.service";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -10,21 +14,62 @@ const Profile = () => {
   const isJefeCarrera = user.role === "jefe_carrera";
   const isAdmin = user.role === "administrador";
 
-  /*const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-CL", {
-      day: "numeric",
-      month: "long",
-    });
-  };*/
+  const [inscriptionsCount, setInscriptionsCount] = useState(0);
+  const [electiveCount, setElectiveCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetchInscriptions = async () => {
+    // solo el alumno obtiene inscripciones
+    if (!isAlumno) return;
+
+    try {
+      setLoading(true);
+
+      const result = await getInscription();
+      if (result.success) {
+        setInscriptionsCount(result.data?.length);
+      }
+    } catch (error) {
+      showErrorAlert("Error", "No se pudieron cargar las inscripciones", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchElectives = async () => {
+    // Solo el docente tiene electivos
+    if (!isDocente) return;
+
+    try {
+      setLoading(true);
+      const result = await getElectives();
+
+      if (result.success) {
+        // Se filtran ya que getElectives trae los electivos propios más los electivos
+        // aprobados de otros profesores.
+        const filteredElectives = result.data?.filter((e) => e.teacherRut === user.rut);
+        setElectiveCount(filteredElectives.length || 0);
+      }
+    } catch (error) {
+      console.error("Error al obtener electivos:", error);
+      showErrorAlert("Error", "No se pudieron obtener los electivos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInscriptions();
+    fetchElectives();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const roleText = {
     alumno: "Alumno",
     docente: "Docente",
     administrador: "Administrador",
-    jefe_carrera: "Jefe de Carrera"
-  }
+    jefe_carrera: "Jefe de Carrera",
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -92,11 +137,7 @@ const Profile = () => {
             {/* Información Académica */}
             <div className="flex flex-col p-4 rounded-md border border-gray-300 shadow-sm flex-1 transition-all hover:shadow-md">
               <h3 className="font-medium text-xl mb-2">Información Académica</h3>
-              {isAdmin && (
-                <p className="text-gray-600 italic">
-                  No disponible para administrador.
-                </p>
-              )}
+              {isAdmin && <p className="text-gray-600 italic">No disponible para administrador.</p>}
 
               {/* Carrera solo alumno y jefe carrera */}
               {(isAlumno || isJefeCarrera) && (
@@ -119,7 +160,10 @@ const Profile = () => {
                   </span>
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Electivos inscritos</span>
-                    <span className="font-medium">X electivos</span>
+                    <span className="font-medium">
+                      {loading ? "Cargando " : inscriptionsCount}{" "}
+                      {inscriptionsCount === 1 ? "electivo" : "electivos"}
+                    </span>
                   </div>
                 </div>
               )}
@@ -132,7 +176,10 @@ const Profile = () => {
                   </span>
                   <div className="flex flex-col">
                     <span className="text-xs text-gray-500">Electivos creados</span>
-                    <span className="font-medium">X electivos</span>
+                    <span className="font-medium">
+                      {loading ? "Cargando " : electiveCount}{" "}
+                      {electiveCount === 1 ? "electivo" : "electivos"}
+                    </span>
                   </div>
                 </div>
               )}
