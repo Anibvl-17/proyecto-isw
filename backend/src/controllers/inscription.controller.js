@@ -137,13 +137,26 @@ export async function updateStatus(req, res){
 
 export async function getElectivesByPrerequisites(req, res){
     try {
-        const electives = await getElectivesByPrerequisitesService();
+        let electives = await getElectivesByPrerequisitesService();
 
         if (!electives) {
             return handleErrorClient(res, 404, "No se encontraron electivos sin requisitos previos.");
         }
 
-        handleSuccess(res, 200, "Electivos sin requisitos obtenidos exitosamente", electives);
+        const authHeader = req.headers["authorization"];
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.decode(token, process.env.JWT_SECRET);
+
+        if(payload.role === "alumno"){
+          electives = electives.filter(e => e.status === "Aprobado");
+
+          if (!electives) {
+            return handleErrorClient(res, 404, "No se encontraron electivos sin requisitos previos.");
+        }
+
+      }
+
+      return handleSuccess(res, 200, "Electivos sin requisitos obtenidos exitosamente", electives);
     } catch (error) {
         handleErrorServer(res, 500, "Error al obtener los electivos", error.message);
     }
