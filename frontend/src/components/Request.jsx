@@ -1,4 +1,4 @@
-import { getElectiveById } from "@services/elective.service"
+import { getElectiveById } from "@services/elective.service";
 import { showErrorAlert } from "@helpers/sweetAlert";
 import { reviewRequest } from "@services/request.service";
 import { getUserById } from "@services/user.service";
