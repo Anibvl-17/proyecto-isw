@@ -16,12 +16,12 @@ const router = Router();
 router.use(authenticateJwt);
 
 router.get("/", verifyRoles(["docente", "alumno"]), getInscription); 
-router.get("/filter", verifyRoles(["alumno", "docente", "jefe_carrera"]), getElectivesByPrerequisites);
+router.get("/filter", verifyRoles(["alumno", "jefe_carrera"]), getElectivesByPrerequisites);
 router.get("/elective/:id", verifyRoles(["docente", "jefe_carrera"]), getInscriptionsByElective);
 
 router.get("/:id", verifyRoles(["alumno"]), getInscriptionId);
 
-router.post("/", verifyRoles(["alumno", "docente"]), createInscription); 
+router.post("/", verifyRoles(["alumno"]), createInscription); 
 
 router.delete("/:id", verifyRoles(["alumno"]), deleteInscriptionId);
 
