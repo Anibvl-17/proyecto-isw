@@ -44,8 +44,9 @@ const Periodos = () => {
     const formatForInput = (dateStr) => {
       if (!dateStr) return "";
       const date = new Date(dateStr);
-      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-      return date.toISOString().slice(0, 16);
+      const offset = date.getTimezoneOffset() * 60000; 
+      const localDate = new Date(date.getTime() + offset);
+      return localDate.toISOString().slice(0, 16);
     };
 
     const result = await Swal.fire({
@@ -101,10 +102,18 @@ const Periodos = () => {
             }
         }
 
+        const adjustToUTC = (localStr) => {
+          if (!localStr) return "";
+          const date = new Date(localStr);
+          const offset = date.getTimezoneOffset() * 60000;
+          const utcDate = new Date(date.getTime() - offset);
+          return utcDate.toISOString().slice(0, 16);
+        };
+
         const dataToSend = {
           nombre,
-          fechaInicio,
-          fechaCierre,
+          fechaInicio: adjustToUTC(fechaInicio),
+          fechaCierre: adjustToUTC(fechaCierre),
           restriccionCarreras: null, 
           restriccionAño: null, 
           visibilidad,
