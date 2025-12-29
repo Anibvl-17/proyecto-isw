@@ -45,7 +45,7 @@ const Periodos = () => {
       if (!dateStr) return "";
       const date = new Date(dateStr);
       const offset = date.getTimezoneOffset() * 60000; 
-      const localDate = new Date(date.getTime() + offset);
+      const localDate = new Date(date.getTime() - offset);
       return localDate.toISOString().slice(0, 16);
     };
 
@@ -102,18 +102,15 @@ const Periodos = () => {
             }
         }
 
-        const adjustToUTC = (localStr) => {
+        const toISODate = (localStr) => {
           if (!localStr) return "";
-          const date = new Date(localStr);
-          const offset = date.getTimezoneOffset() * 60000;
-          const utcDate = new Date(date.getTime() - offset);
-          return utcDate.toISOString().slice(0, 16);
+          return new Date(localStr).toISOString();
         };
 
         const dataToSend = {
           nombre,
-          fechaInicio: adjustToUTC(fechaInicio),
-          fechaCierre: adjustToUTC(fechaCierre),
+          fechaInicio: toISODate(fechaInicio),
+          fechaCierre: toISODate(fechaCierre),
           restriccionCarreras: null, 
           restriccionAño: null, 
           visibilidad,
