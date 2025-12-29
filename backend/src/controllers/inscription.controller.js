@@ -148,15 +148,15 @@ export async function getElectivesByPrerequisites(req, res){
         const payload = jwt.decode(token, process.env.JWT_SECRET);
 
         if(payload.role === "alumno"){
-          electives = electives.filter(e => e.status === "Aprobado");
+            electives = electives.filter(e => e.status === "Aprobado");
 
-          if (!electives) {
+            if (!electives) {
             return handleErrorClient(res, 404, "No se encontraron electivos sin requisitos previos.");
+            }
+
         }
 
-      }
-
-      return handleSuccess(res, 200, "Electivos sin requisitos obtenidos exitosamente", electives);
+        return handleSuccess(res, 200, "Electivos sin requisitos obtenidos exitosamente", electives);
     } catch (error) {
         handleErrorServer(res, 500, "Error al obtener los electivos", error.message);
     }
